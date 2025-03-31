@@ -4,6 +4,45 @@ import React from 'react'
 const Login = () => {
  // This is some boiler plate for the login page
 
+ // Backend request for Login
+ const [userName, setUserName] = useState('');
+ const [passWord, setPassword] = useState('');
+ //
+ const [error, setError] = useState('');
+ const [loading, setLoading] = useState(false);
+ // 
+ const LoginUser = async (userName, passWord) => {
+    const requestData = {
+      email: userName,
+      password: passWord,
+    };
+
+    try {
+      // Sending POST request (I know that its weird right now, we might change type later)
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData), // Convert the data to JSON
+      });
+      // close enough for now
+      if (response.ok) {
+        alert('Login Successful');
+        const data = await response.json();
+        console.log("Data:", data)
+      } 
+      else {
+        const data = await response.json();
+        console.log("Data but went wrong:", data)
+      }
+    } catch (error) {
+      setMessage('Error: ' + error.message); 
+    }
+};
+
+ //
+
   return (
     <div className="flex justify-center items-center h-screen bg-[#d8eafe]">
       <div className="w-full max-w-sm">
@@ -23,6 +62,8 @@ const Login = () => {
                 type="text"
                 placeholder="USERNAME"
                 className="w-full outline-none bg-white text-gray-700 placeholder-gray-500"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
               />
             </div>
           </div>
@@ -35,12 +76,14 @@ const Login = () => {
                 type="password"
                 placeholder="PASSWORD"
                 className="w-full outline-none bg-white text-gray-700 placeholder-gray-500"
+                value={passWord}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
 
           {/* Login Button */}
-          <button className="w-full bg-white text-blue-600 font-semibold py-2 rounded-md shadow-md border border-gray-300 hover:bg-gray-100 transition">
+          <button className="w-full bg-white text-blue-600 font-semibold py-2 rounded-md shadow-md border border-gray-300 hover:bg-gray-100 transition" onClick={() => LoginUser(userName, passWord)}>
             LOGIN
           </button>
 

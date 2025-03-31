@@ -4,15 +4,25 @@ import { useState } from "react";
 //import Navbar from '../components/Navbar'; // This is for a navbar from my individual if I knew how Michael was making his
 const Registration = () => {
     // This is some boiler plate for the Registration page
-    // Const
+    // Use State Variables
     const [selectedRole, setSelectedRole] = useState(null);
     const [roleChosen, setRoleChosen] = useState(false);
+    // The text fields variables TODO
+
+    //
 
     const handleRoleClick = (role) => {
         setSelectedRole(role);
         setRoleChosen(true);
         //alert(`You selected: ${role}`);
     };
+
+    // Backend request for Registration
+    // All post requests for them at the below route
+    // '/api/register/patient', methods=['POST']
+    // '/api/register/doctor', methods=['POST']
+    // '/api/register/pharmacy', methods=['POST']
+
 
     // 
 

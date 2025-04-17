@@ -3,6 +3,7 @@ import './patientDashboard.css';
 import BookAppointmentModal from "./BookAppointmentModal";
 import WeightChart from "./WeightChart";
 import CalorieChart from "./CalorieChart";
+import {useNavigate} from "react-router-dom";
 
 function PatientDashboard() {
     const storedUser = localStorage.getItem('user');
@@ -33,6 +34,8 @@ function PatientDashboard() {
     const [acceptedAppointments, setAcceptedAppointments] = useState([]);
     const [canceledAppointments, setCanceledAppointments] = useState([]);
     const [completedAppointments, setCompletedAppointments] = useState([]);
+
+    const navigate = useNavigate();
 
     // Function to trigger booking modal
     const openBookingModal = (doctor_id) => {
@@ -444,7 +447,13 @@ function PatientDashboard() {
                                         <p><strong>Fulfilled:</strong> {payment.is_fulfilled ? "Yes" : "No"}</p>
                                         <p><strong>Date:</strong> {payment.payment_date}</p>
                                         {!payment.is_fulfilled && (
-                                            <button className="fulfill-button">
+                                            <button className="fulfill-button"
+                                                    onClick={() =>
+                                                        navigate('/payment', {
+                                                            state: { transaction_id: payment.payment_id }
+                                                        })
+                                                    }
+                                            >
                                                 Pay Now
                                             </button>
                                         )}

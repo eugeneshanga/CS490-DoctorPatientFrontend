@@ -225,7 +225,16 @@ function DoctorDashboard() {
                     </div>
                 </div>
             );
-        }
+        }else if (activeTab === "chat") {
+            return (
+              <div>
+                <h3>Doctor-Patient Chat</h3>
+                {doctorDetails && (
+                  <ChatWindow doctorId={doctorDetails.doctor_id} />
+                )}
+              </div>
+            );
+          }
     };
 
     return (
@@ -263,6 +272,8 @@ function DoctorDashboard() {
                         <li>
                             <button onClick={() => setActiveTab("payments")}>Payments</button>
                         </li>
+                        <li><button onClick={() => setActiveTab("chat")}>Chat</button></li>
+
                     </ul>
                 </nav>
 

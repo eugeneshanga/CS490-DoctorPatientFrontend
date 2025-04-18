@@ -4,6 +4,7 @@ import BookAppointmentModal from "./BookAppointmentModal";
 import WeightChart from "./WeightChart";
 import CalorieChart from "./CalorieChart";
 import {useNavigate} from "react-router-dom";
+import ChatWindow from '../../Components/ChatWindow';
 
 function PatientDashboard() {
     const storedUser = localStorage.getItem('user');

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './doctorDashboard.css';
+import ChatWindow from '../../Components/ChatWindow';
 
 function DoctorDashboard() {
     const storedUser = localStorage.getItem('user');

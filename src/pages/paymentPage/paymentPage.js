@@ -17,12 +17,14 @@ const PaymentPage = () => {
   //
   const [cardName, setCardName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
-  const [exdDate, setExDate] = useState(null);
-  const [cvv, setCVV] = useState(null);
+  const [exdDate, setExDate] = useState('');
+  const [cvv, setCVV] = useState('');
 
   useEffect(() => {
     //const getRealTransaction = async () => {
       console.log("TEST!!!!!!!!!!!")
+      
+
       if(txnType === "pharmacy"){
         fetch(`http://localhost:5000/api/payment/transaction/payments/pharmacy/${txnId}`)
             .then(response => response.json())
@@ -33,7 +35,7 @@ const PaymentPage = () => {
             })
             .catch(error => console.error('Error fetching patient details:', error));
       }
-      else{
+      else if(txnType === "doctor"){
         fetch(`http://localhost:5000/api/payment/transaction/payments/doctor/${txnId}`)
             .then(response => response.json())
             .then(data => {
@@ -42,6 +44,9 @@ const PaymentPage = () => {
               console.log(payment)
             })
             .catch(error => console.error('Error fetching patient details:', error));
+      }
+      else{
+        navigate(-1)
       }
   }, []); // END OF USE EFFECT
 
@@ -97,8 +102,9 @@ const PaymentPage = () => {
           throw new Error('Invalid id');
         if (!requestedData) 
           throw new Error('Invalid updatedData');
-  
-        const response = await fetch(`http://localhost:5000/api/payment/transaction/payments/pharmacy/${payment_id}`, {
+        
+        console.log("Am i real?:", requestedData)
+        const response = await fetch(`http://localhost:5000/api/payment/transaction/payments/pharmacy/${payment_id}/fulfill`, {
           method: 'PATCH', // Use PATCH to update
           headers: {
             'Content-Type': 'application/json',
@@ -130,7 +136,7 @@ const PaymentPage = () => {
         if (!requestedData) 
           throw new Error('Invalid updatedData');
   
-        const response = await fetch(`http://localhost:5000/api/payment/transaction/payments/doctor/${payment_id}`, {
+        const response = await fetch(`http://localhost:5000/api/payment/transaction/payments/doctor/${payment_id}/fulfill`, {
           method: 'PATCH', // Use PATCH to update
           headers: {
             'Content-Type': 'application/json',
@@ -157,16 +163,28 @@ const PaymentPage = () => {
   }; // END OF UPDATE
 
   const attemptPayment = () =>{
+    const [month, year] = exdDate.split("/");
     if(validInputs){
       const updatedData = {
-          cardName,
-          cardNumber,
-          exdDate,
-          cvv
+        cardholder_name: cardName,
+        card_number: cardNumber,
+        exp_month: month,
+        exp_year: year,
+        cvv: cvv
       };
       fulfillPayment(txnId, updatedData)
+      console.log("Payment id?:", txnId)
+      console.log("Data?:" , updatedData)
+      alert("Transction Complete")
+      navigate('/payment', {
+        state: {
+            transaction_id: -1,
+            transaction_type: 'null'
+        }
+      })
     }
     else{
+      alert("Error in transaction")
       console.log("NOT VALID PAYMENT ATTEMPT!!!")
     }
   }
@@ -182,7 +200,7 @@ const PaymentPage = () => {
   if (!payment) {
     return <div className="flex justify-center items-center h-screen text-gray-400 text-lg">Loading...</div>;
   }
-
+  
   const DetailItem = ({ label, value }) => (
     <div className="flex justify-between items-center px-4 py-3 bg-white border rounded-xl shadow-sm hover:shadow-md transition duration-200">
       <span className="text-sm font-medium text-gray-500">{label}</span>

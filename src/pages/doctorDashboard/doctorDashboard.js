@@ -16,6 +16,90 @@ function DoctorDashboard() {
     const [updateMessage, setUpdateMessage] = useState('');
     const [showUpdatePopup, setShowUpdatePopup] = useState(false);
 
+    // Meal plan
+    const [showMealplanModal, setShowMealplanModal] = useState(false);
+
+    const [officialMealplans, setOfficialMealplans] = useState([]);
+
+    const [mealplanData, setMealplanData] = useState({
+        title: '',
+        description: '',
+        instructions: '',
+        ingredients: '',
+        calories: '',
+        fat: '',
+        sugar: '',
+        image: null
+    });
+
+    const handleMealplanChange = (e) => {
+        const { name, value, files } = e.target;
+        setMealplanData(prev => ({
+            ...prev,
+            [name]: files ? files[0] : value
+        }));
+    };
+
+    const fetchOfficialMealplans = async () => {
+        const userId = 1; // or get from localStorage
+        try {
+            const response = await fetch(`http://localhost:5000/api/doctor-dashboard/official/all?user_id=${userId}`);
+            const data = await response.json();
+            if (response.ok) {
+                setOfficialMealplans(data.mealplans || []);
+            } else {
+                console.error("Failed to fetch:", data.error);
+            }
+        } catch (err) {
+            console.error("Fetch error:", err);
+        }
+    };
+
+    const submitOfficialMealplan = async () => {
+        const userId = 1; // or pull from localStorage if dynamic
+        if (!mealplanData.title.trim()) {
+            alert("Title is required!");
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append("user_id", userId);
+        for (let key in mealplanData) {
+            if (mealplanData[key]) {
+                formData.append(key, mealplanData[key]);
+            }
+        }
+    
+        // Optional: Debug what’s being sent
+        console.log("Submitting mealplan to: http://localhost:5000/api/doctor-dashboard/official/create");
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+    
+        try {
+            const response = await fetch("http://localhost:5000/api/doctor-dashboard/official/create", {
+                method: "POST",
+                body: formData
+            });
+    
+            const result = await response.json();
+            if (response.ok) {
+                alert("Official mealplan created!");
+                setShowMealplanModal(false);
+                fetchOfficialMealplans(); // Refresh list
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (err) {
+            console.error("Submission failed:", err);
+            alert("An error occurred while creating the mealplan.");
+        }
+    };
+    // Fetch Mealplan
+    useEffect(() => {
+        fetchOfficialMealplans();
+    }, []);
+
     // Function to fetch appointments
     const fetchAppointments = () => {
         fetch(`http://localhost:5000/api/doctor-dashboard/appointments?user_id=${user_id}`)
@@ -197,10 +281,68 @@ function DoctorDashboard() {
         } else if (activeTab === "meal-plans") {
             return (
                 <div>
-                    <h3>Official Meal Plans</h3>
-                    <p>Meal plans content goes here...</p>
+            <h3>Official Meal Plans</h3>
+            <button className="submit-metrics-button" onClick={() => setShowMealplanModal(true)}>
+                Create Official Mealplan
+            </button>
+
+            {/* Mealplan Modal */}
+            {showMealplanModal && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h4>Enter Official Mealplan Info</h4>
+                        <label>Title
+                            <input type="text" name="title" value={mealplanData.title} onChange={handleMealplanChange} />
+                        </label>
+                        <label>Description
+                            <input type="text" name="description" value={mealplanData.description} onChange={handleMealplanChange} />
+                        </label>
+                        <label>Instructions
+                            <input type="text" name="instructions" value={mealplanData.instructions} onChange={handleMealplanChange} />
+                        </label>
+                        <label>Ingredients
+                            <input type="text" name="ingredients" value={mealplanData.ingredients} onChange={handleMealplanChange} />
+                        </label>
+                        <label>Calories
+                            <input type="number" name="calories" value={mealplanData.calories} onChange={handleMealplanChange} />
+                        </label>
+                        <label>Fat
+                            <input type="number" name="fat" value={mealplanData.fat} onChange={handleMealplanChange} />
+                        </label>
+                        <label>Sugar
+                            <input type="number" name="sugar" value={mealplanData.sugar} onChange={handleMealplanChange} />
+                        </label>
+                        <label>Image
+                            <input type="file" name="image" onChange={handleMealplanChange} />
+                        </label>
+                        <div className="modal-actions">
+                            <button onClick={submitOfficialMealplan}>Submit</button>
+                            <button onClick={() => setShowMealplanModal(false)}>Cancel</button>
+                        </div>
+                    </div>
                 </div>
-            );
+            )}
+
+            {/* Display List of Mealplans */}
+            <div style={{ marginTop: '2rem' }}>
+                {officialMealplans.length > 0 ? (
+                    officialMealplans.map(plan => (
+                        <div key={plan.meal_plan_id} className="doctor-card">
+                            <h4>{plan.title}</h4>
+                            <p><strong>Description:</strong> {plan.description}</p>
+                            <p><strong>Calories:</strong> {plan.calories}</p>
+                            <p><strong>Fat:</strong> {plan.fat}</p>
+                            <p><strong>Sugar:</strong> {plan.sugar}</p>
+                            <p><strong>Ingredients:</strong> {plan.ingredients}</p>
+                            <p><strong>Instructions:</strong> {plan.instructions}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p>No official mealplans yet.</p>
+                )}
+            </div>
+        </div>
+    );
         } else if (activeTab === "payments") {
             return (
                 <div>

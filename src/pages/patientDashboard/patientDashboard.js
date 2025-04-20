@@ -23,6 +23,83 @@ function PatientDashboard() {
     const [bookingMessage] = useState('');
     const [showBookingPopup, setShowBookingPopup] = useState(false);
 
+    // Mealplan state and modal logic
+    const [showMealplanModal, setShowMealplanModal] = useState(false);
+
+    const [mealplanData, setMealplanData] = useState({
+        title: '',
+        description: '',
+        instructions: '',
+        ingredients: '',
+        calories: '',
+        fat: '',
+        sugar: '',
+        image: null
+    });
+
+    const handleMealplanChange = (e) => {
+        const { name, value, files } = e.target;
+        setMealplanData(prev => ({
+            ...prev,
+            [name]: files ? files[0] : value
+        }));
+    };
+
+    const submitMealplan = async () => {
+        const userId = 1; 
+        if (!mealplanData.title.trim()) return alert("Title is required!");
+    
+        const payload = new FormData();
+        payload.append('user_id', userId);
+    
+        for (let key in mealplanData) {
+            if (mealplanData[key]) {
+                payload.append(key, mealplanData[key]);
+            }
+        }
+    
+        try {
+            const response = await fetch('http://localhost:5000/api/patient-dashboard/mealplans/patient/create', {
+                method: 'POST',
+                body: payload
+            });
+    
+            const result = await response.json();
+            if (response.ok) {
+                alert("Mealplan created successfully!");
+                setShowMealplanModal(false);
+                fetchMealplans(); // ✅ refresh list after submission
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred. See console.");
+        }
+    };
+
+    // Fetches mealplans
+    const [mealplans, setMealplans] = useState([]);
+
+    const fetchMealplans = async () => {
+        const userId = 1; // or parseInt(localStorage.getItem('user_id'), 10);
+        try {
+            const response = await fetch(`http://localhost:5000/api/patient-dashboard/mealplans/patient/all?user_id=${userId}`);
+            const data = await response.json();
+            if (response.ok) {
+                setMealplans(data.mealplans || []);
+            } else {
+                console.error("Error fetching mealplans:", data.error);
+            }
+        } catch (err) {
+            console.error("Fetch failed:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchMealplans();
+    }, []);
+
     // States for payments
     const [doctorPayments, setDoctorPayments] = useState([]);
     const [pharmacyPayments, setPharmacyPayments] = useState([]);
@@ -289,8 +366,72 @@ function PatientDashboard() {
                             <p>No results found.</p>
                         )}
                     </div>
+            
+                    {/* Mealplan Section */}
+                    <div style={{ marginTop: '2rem' }}>
+                        <h3>Mealplans</h3>
+                        <button className="submit-metrics-button" onClick={() => setShowMealplanModal(true)}>
+                            Create Mealplan
+                        </button>
+                    </div>
+            
+                    {showMealplanModal && (
+                        <div className="modal-overlay">
+                            <div className="modal">
+                                <h4>Enter Mealplan Info</h4>
+                                <label>Title
+                                    <input type="text" name="title" value={mealplanData.title} onChange={handleMealplanChange} />
+                                </label>
+                                <label>Description
+                                    <input type="text" name="description" value={mealplanData.description} onChange={handleMealplanChange} />
+                                </label>
+                                <label>Instructions
+                                    <input type="text" name="instructions" value={mealplanData.instructions} onChange={handleMealplanChange} />
+                                </label>
+                                <label>Ingredients
+                                    <input type="text" name="ingredients" value={mealplanData.ingredients} onChange={handleMealplanChange} />
+                                </label>
+                                <label>Calories
+                                    <input type="number" name="calories" value={mealplanData.calories} onChange={handleMealplanChange} />
+                                </label>
+                                <label>Fat
+                                    <input type="number" name="fat" value={mealplanData.fat} onChange={handleMealplanChange} />
+                                </label>
+                                <label>Sugar
+                                    <input type="number" name="sugar" value={mealplanData.sugar} onChange={handleMealplanChange} />
+                                </label>
+                                <label>Image
+                                    <input type="file" name="image" onChange={handleMealplanChange} />
+                                </label>
+                                <div className="modal-actions">
+                                    <button onClick={submitMealplan}>Submit</button>
+                                    <button onClick={() => setShowMealplanModal(false)}>Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                     {/* Render list of mealplans */}
+                    <div style={{ marginTop: '2rem' }}>
+                        <h4>Your Mealplans</h4>
+                        {mealplans.length > 0 ? (
+                            mealplans.map(plan => (
+                                <div key={plan.meal_plan_id} className="doctor-card">
+                                    <h4>{plan.title}</h4>
+                                    <p><strong>Description:</strong> {plan.description}</p>
+                                    <p><strong>Calories:</strong> {plan.calories}</p>
+                                    <p><strong>Fat:</strong> {plan.fat}</p>
+                                    <p><strong>Sugar:</strong> {plan.sugar}</p>
+                                    <p><strong>Ingredients:</strong> {plan.ingredients}</p>
+                                    <p><strong>Instructions:</strong> {plan.instructions}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No mealplans yet.</p>
+                        )}
+                    </div>
                 </div>
             );
+        /* Appointments Section */
         } else if (activeTab === "appointments") {
             return (
                 <div>
@@ -351,9 +492,12 @@ function PatientDashboard() {
                                 <p>No completed appointments.</p>
                             )}
                         </div>
+                        
                     </div>
                 </div>
+                
             );
+        /* Metrics Tab */
         } else if (activeTab === "metrics") {
             return (
                 <div>
@@ -411,6 +555,7 @@ function PatientDashboard() {
                     )}
                 </div>
             );
+        /* Payments Tab */
         } else if (activeTab === "payments") {
             return (
                 <div>

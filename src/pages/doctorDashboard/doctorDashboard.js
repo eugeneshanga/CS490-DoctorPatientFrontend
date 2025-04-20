@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './doctorDashboard.css';
 import Logo from '../../Assets/Logo/logo.png';
+import ChatWindow from '../../Components/ChatWindow';
+import {useNavigate} from "react-router-dom";
+import ChatHistory from "../../Components/ChatHistory";
 
 function DoctorDashboard() {
     const storedUser = localStorage.getItem('user');
@@ -15,6 +18,11 @@ function DoctorDashboard() {
     const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "meal-plans", or "payments"
     const [updateMessage, setUpdateMessage] = useState('');
     const [showUpdatePopup, setShowUpdatePopup] = useState(false);
+  
+    // inside DoctorDashboard()
+    const [activeChatAppointment, setActiveChatAppointment] = useState(null);
+
+    const navigate = useNavigate();
 
     // Meal plan
     const [showMealplanModal, setShowMealplanModal] = useState(false);
@@ -166,6 +174,36 @@ function DoctorDashboard() {
             .catch(error => console.error('Error fetching doctor details:', error));
     }, [user_id]);
 
+    const handleEndAppointment = async () => {
+        const apptId = activeChatAppointment.appointment_id;
+        try {
+            // 1) Mark completed in DB
+            await fetch('http://localhost:5000/api/doctor-dashboard/appointments/complete', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ appointment_id: apptId }),
+            });
+
+            // 2) Notify patient via chat
+            await fetch('http://localhost:5000/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    doctor_id: doctorDetails.doctor_id,
+                    patient_id: activeChatAppointment.patient_id,
+                    sender_type: 'doctor',
+                    message: 'The appointment has ended.',
+                }),
+            });
+
+            // 3) Redirect to post‑appointment placeholder
+            navigate('/post-appointment');
+        } catch (err) {
+            console.error('❌ Error ending appointment:', err);
+            alert('Could not end appointment. Please try again.');
+        }
+    };
+
     // Function to respond to an appointment
     const respondAppointment = (appointment_id, accepted) => {
         fetch('http://localhost:5000/api/doctor-dashboard/appointments/respond', {
@@ -194,7 +232,7 @@ function DoctorDashboard() {
         if (activeTab === "dashboard") {
             return (
                 <div>
-                    <h3>Scheduled Appointments</h3>
+                    <h3>Requested Appointments</h3>
                     <div className="appointments-container">
                         {appointments.map(app => (
                             <div key={app.appointment_id} className="appointment-card">
@@ -222,21 +260,59 @@ function DoctorDashboard() {
                 </div>
             );
         } else if (activeTab === "appointments") {
+            if (activeTab === "appointments" && activeChatAppointment) {
+                return (
+                    <div>
+                        <button onClick={() => setActiveChatAppointment(null)}>
+                            ← Back to Appointments
+                        </button>
+                        <button
+                            className="end-appointment-button"
+                            onClick={handleEndAppointment}
+                        >
+                            End Appointment
+                        </button>
+
+                        <ChatWindow
+                            doctorId={doctorDetails.doctor_id}
+                            patientId={activeChatAppointment.patient_id}
+                            isDoctor={true}
+                        />
+                    </div>
+                );
+            }
             return (
                 <div>
                     <h3>Appointment History</h3>
+
                     <div>
                         <h4>Accepted Appointments</h4>
                         <div className="appointments-container">
                             {acceptedAppointments.length > 0 ? (
-                                acceptedAppointments.map(app => (
-                                    <div key={app.appointment_id} className="appointment-card">
-                                        <h5>Appointment #{app.appointment_id}</h5>
-                                        <p><strong>Patient ID:</strong> {app.patient_id}</p>
-                                        <p><strong>Date/Time:</strong> {app.appointment_time}</p>
-                                        <p><strong>Status:</strong> {app.status}</p>
-                                    </div>
-                                ))
+                                acceptedAppointments.map(app => {
+                                    const apptDate    = new Date(app.appointment_time);
+                                    const now         = new Date();
+                                    const diffMs      = apptDate - now;
+                                    const isStartable = diffMs >= -30  * 60 * 1000 && diffMs <= 15 * 60 * 1000;
+
+                                    return (
+                                        <div key={app.appointment_id} className="appointment-card">
+                                            <h5>Appointment #{app.appointment_id}</h5>
+                                            <p><strong>Patient ID:</strong> {app.patient_id}</p>
+                                            <p><strong>Date/Time:</strong> {apptDate.toLocaleString()}</p>
+                                            <p><strong>Status:</strong> {app.status}</p>
+
+                                            {isStartable && (
+                                                <button
+                                                    className="start-appointment-button"
+                                                    onClick={() => setActiveChatAppointment(app)}
+                                                >
+                                                    Start Appointment
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })
                             ) : (
                                 <p>No accepted appointments.</p>
                             )}
@@ -369,6 +445,19 @@ function DoctorDashboard() {
                 </div>
             );
         }
+        else if (activeTab === "chat-history") {
+            return (
+                <div>
+                    <h3>Chat History</h3>
+                    {doctorDetails && (
+                        <ChatHistory
+                            doctorId={doctorDetails.doctor_id}
+                            isDoctor={true}
+                        />
+                    )}
+                </div>
+            );
+        }
     };
 
     return (
@@ -406,6 +495,8 @@ function DoctorDashboard() {
                         <li>
                             <button onClick={() => setActiveTab("payments")}>Payments</button>
                         </li>
+                        <li><button onClick={() => setActiveTab("chat-history")}>Chat History</button></li>
+
                     </ul>
                 </nav>
 

@@ -11,7 +11,7 @@ const Login = () => {
  const [userName, setUserName] = useState('');
  const [passWord, setPassword] = useState('');
  //
- const [error, setError] = useState(''); // Might add this back
+ const [error, setError] = useState('');
  const [loading, setLoading] = useState(false);
  //for navigating to the dashboards
  const navigate = useNavigate();
@@ -42,7 +42,7 @@ const Login = () => {
         if(data.user.user_type === 'patient'){
           navigate('/patient');
         }
-        else if(data.user.user_type == 'doctor'){
+        else if(data.user.user_type === 'doctor'){
           navigate('/doctors');
         }
       } 

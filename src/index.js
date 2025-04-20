@@ -8,6 +8,7 @@ import RegistrationPage from './pages/registration'
 import PatientPage from './pages/patientDashboard/patientDashboard'
 import DoctorPage from './pages/doctorDashboard/doctorDashboard'
 import PaymentPage from './pages/paymentPage/paymentPage'
+import PostAppointmentPage from './pages/doctorDashboard/PostAppointment';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
   {
     path: "/payment",
     element: <PaymentPage />,
+  },
+  {
+    path: "/post-appointment",
+    element: <PostAppointmentPage />,
   },
 ]);
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
 import './index.css';
+import PharmacyDashboard from "./pages/pharmacyDashboard/pharmacyDashboard";
 import LandingPage from './pages/landingPage';
 import LoginPage from './pages/login'
 import RegistrationPage from './pages/registration'
@@ -34,6 +34,10 @@ const router = createBrowserRouter([
     path: "/doctors",
     element: <DoctorPage />,
   },
+  {
+    path: "/pharmacy-dashboard",
+    element: <PharmacyDashboard />,
+  }
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

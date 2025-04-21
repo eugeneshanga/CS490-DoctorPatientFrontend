@@ -6,6 +6,8 @@ import Pharmacists from '../Components/LandingPage/Pharmacists';
 import Testimonials from '../Components/LandingPage/Testimonials';
 import About from '../Components/LandingPage/About';
 import Footer from '../Components/Footer/Footer';
+import { Link } from "react-router-dom";
+
 /* For Grey Background */
 import './LandingPage.css'
 
@@ -18,7 +20,7 @@ function LandingPage() {
 
       {/* Main grey background area */}
       <div className="landing-background">
-
+    
         <section id="home">
           <div className="landing-container">
             <HeroSection />
@@ -50,6 +52,18 @@ function LandingPage() {
         </section>
 
       </div>
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+  <Link to="/pharmacy-dashboard" style={{
+    fontSize: '1.2rem',
+    backgroundColor: '#007bff',
+    color: 'white',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    textDecoration: 'none'
+  }}>
+    Go to Pharmacy Dashboard
+  </Link>
+</div>
 
       <Footer />
     </>

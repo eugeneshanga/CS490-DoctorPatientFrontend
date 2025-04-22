@@ -53,16 +53,6 @@ function LandingPage() {
 
       </div>
       <div style={{ textAlign: 'center', padding: '20px' }}>
-  <Link to="/pharmacy-dashboard" style={{
-    fontSize: '1.2rem',
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '10px 20px',
-    borderRadius: '5px',
-    textDecoration: 'none'
-  }}>
-    Go to Pharmacy Dashboard
-  </Link>
 </div>
 
       <Footer />

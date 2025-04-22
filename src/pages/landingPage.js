@@ -6,7 +6,6 @@ import Pharmacists from '../Components/LandingPage/Pharmacists';
 import Testimonials from '../Components/LandingPage/Testimonials';
 import About from '../Components/LandingPage/About';
 import Footer from '../Components/Footer/Footer';
-import { Link } from "react-router-dom";
 
 /* For Grey Background */
 import './LandingPage.css'
@@ -52,9 +51,6 @@ function LandingPage() {
         </section>
 
       </div>
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-</div>
-
       <Footer />
     </>
   );

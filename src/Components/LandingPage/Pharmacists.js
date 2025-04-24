@@ -1,5 +1,6 @@
 import './Pharmacists.css';
-import PharmacyImage from '../../Assets/Landing/Pharmacist.png'; 
+import PharmacyImage from '../../Assets/Landing/Pharmacist.png';
+import BufoPainkillers from '../../Assets/Landing/BufoPainkillers.png';
 
 function Pharmacists() {
   return (
@@ -7,7 +8,7 @@ function Pharmacists() {
       <div className="pharmacists-content">
         {/* LEFT: Image */}
         <div className="pharmacists-image">
-          <img src={PharmacyImage} alt="Pharmacist" />
+          <img src={BufoPainkillers} alt="Pharmacist" />
         </div>
 
         {/* RIGHT: Text content */}

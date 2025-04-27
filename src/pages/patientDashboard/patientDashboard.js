@@ -22,6 +22,9 @@ function PatientDashboard() {
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [selectedDoctorId, setSelectedDoctorId] = useState(null);
 
+    // Patient current prescriptions
+    const [prescriptions, setPrescriptions] = useState([]);
+
     // Dark Mode
     const isDark = localStorage.getItem('dashboardDarkMode') === 'true';
 
@@ -119,6 +122,18 @@ function PatientDashboard() {
             alert("An error occurred. See console.");
         }
     };
+
+    useEffect(() => {
+        if (activeTab === "prescriptions") {
+            fetch(`http://localhost:5000/api/patient-dashboard/prescriptions?user_id=${user_id}`)
+              .then(res => res.json())
+              .then(data => {
+                  if (Array.isArray(data)) setPrescriptions(data);
+                  else console.error("Error loading prescriptions:", data.error);
+              })
+              .catch(err => console.error("Network error:", err));
+        }
+    }, [activeTab, user_id]);
 
     // Fetches mealplans
     const [mealplans, setMealplans] = useState([]);
@@ -755,6 +770,28 @@ function PatientDashboard() {
                 </div>
             );
         }
+        else if (activeTab === "prescriptions") {
+            return (
+              <div>
+                  <h3>Your Prescriptions</h3>
+                  {prescriptions.length > 0 ? (
+                    <ul className="prescription-list">
+                        {prescriptions.map(p => (
+                          <li key={p.prescription_id} className="prescription-card">
+                              <p><strong>Drug:</strong> {p.drug_name}</p>
+                              <p><strong>Dosage:</strong> {p.dosage}</p>
+                              <p><strong>Instructions:</strong> {p.instructions}</p>
+                              <p><strong>Requested at:</strong> {new Date(p.requested_at).toLocaleString()}</p>
+                              <p><strong>Status</strong>: {p.status}</p>
+                          </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    <p>No prescriptions.</p>
+                  )}
+              </div>
+            );
+        }
     };
 
     return (
@@ -807,6 +844,14 @@ function PatientDashboard() {
                     >
                         Chat History
                     </button>
+                    </li>
+                    <li>
+                        <button
+                          className={activeTab === "prescriptions" ? "active-tab" : ""}
+                          onClick={() => setActiveTab("prescriptions")}
+                        >
+                            Prescriptions
+                        </button>
                     </li>
                 </ul>
                 </nav>

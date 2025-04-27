@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './PostAppointment.css';
 
@@ -8,49 +8,91 @@ export default function PostAppointmentPage() {
 
     const [amount, setAmount] = useState('');
     const [notes, setNotes] = useState('');
-    const [prescription, setPrescription] = useState('');
+    const [drugs, setDrugs] = useState([]);
+    const [selectedDrug, setSelectedDrug] = useState('');
+    const [dosage, setDosage] = useState('');
+    const [instructions, setInstructions] = useState('');
     const [mealPlan, setMealPlan] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e) => {
+    // Load the five weight-loss drugs
+    useEffect(() => {
+        fetch('http://localhost:5001/api/prescriptions/drugs')
+          .then(res => res.json())
+          .then(setDrugs)
+          .catch(err => console.error('Error loading drugs:', err));
+    }, []);
+
+    const handleSubmit = async e => {
         e.preventDefault();
         setSubmitting(true);
         setError('');
 
-        // Only payment is wired for now:
+        // 1) Create payment
         try {
-            const res = await fetch(
-                'http://localhost:5000/api/doctor-dashboard/payments/create',
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        doctor_id,
-                        patient_id,
-                        appointment_id,
-                        amount: parseFloat(amount),
-                    }),
-                }
+            const payRes = await fetch(
+              'http://localhost:5000/api/doctor-dashboard/payments/create',
+              {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      doctor_id,
+                      patient_id,
+                      appointment_id,
+                      amount: parseFloat(amount),
+                  }),
+              }
             );
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error || 'Failed to create payment.');
+            const payData = await payRes.json();
+            if (!payRes.ok) {
+                setError(payData.error || 'Failed to create payment.');
                 setSubmitting(false);
                 return;
             }
-            // if we wanted to send notes/prescriptions later, we'd fire those off here too
-
-
-            // *** confirmation popup ***
-            const leave = window.confirm(
-                'Resulted submitted successfully!\n\nPress OK to return to your dashboard.'
-            );
-            if (leave) navigate('/doctors');
-
         } catch (err) {
-            console.error(err);
-            setError('An unexpected error occurred.');
+            console.error('Payment error:', err);
+            setError('An unexpected error occurred creating payment.');
+            setSubmitting(false);
+            return;
+        }
+
+        // 2) Request prescription
+        try {
+            const presRes = await fetch(
+              'http://localhost:5001/api/prescriptions/request',
+              {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                      doctor_id,
+                      patient_id,
+                      drug_id: parseInt(selectedDrug, 10),
+                      dosage,
+                      instructions,
+                  }),
+              }
+            );
+            const presData = await presRes.json();
+            if (!presRes.ok) {
+                setError(presData.error || 'Failed to request prescription.');
+                setSubmitting(false);
+                return;
+            }
+        } catch (err) {
+            console.error('Prescription error:', err);
+            setError('An unexpected error occurred requesting prescription.');
+            setSubmitting(false);
+            return;
+        }
+
+        // 3) Confirmation & redirect
+        const leave = window.confirm(
+          'All done! Appointment summary & prescription submitted.\n\nOK to return to your dashboard?'
+        );
+        if (leave) {
+            navigate('/doctors');
+        } else {
             setSubmitting(false);
         }
     };
@@ -95,13 +137,43 @@ export default function PostAppointmentPage() {
 
                     <div className="section">
                         <h3 className="section-title">Prescribe Drug</h3>
-                        <input
-                            type="text"
-                            value={prescription}
-                            onChange={e => setPrescription(e.target.value)}
-                            placeholder="e.g. Metformin 500mg"
-                            className="input"
-                        />
+                        <div className="form-group">
+                            <label>Drug</label>
+                            <select
+                              value={selectedDrug}
+                              onChange={e => setSelectedDrug(e.target.value)}
+                              required
+                              className="input"
+                            >
+                                <option value="">— Select a drug —</option>
+                                {drugs.map(drug => (
+                                  <option key={drug.drug_id} value={drug.drug_id}>
+                                      {drug.name}
+                                  </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Dosage</label>
+                            <input
+                              type="text"
+                              value={dosage}
+                              onChange={e => setDosage(e.target.value)}
+                              placeholder="e.g. 500mg"
+                              required
+                              className="input"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Instructions</label>
+                            <textarea
+                              rows={2}
+                              value={instructions}
+                              onChange={e => setInstructions(e.target.value)}
+                              placeholder="e.g. Take twice daily"
+                              className="input"
+                            />
+                        </div>
                     </div>
 
                     <div className="section">

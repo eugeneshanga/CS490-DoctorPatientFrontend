@@ -328,3 +328,15 @@
 .start-appointment-button:hover {
     background-color: #218838;
 }
+
+.prescription-list {
+    list-style: none;
+    padding: 0;
+}
+.prescription-card {
+    border: 1px solid #ddd;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    background: #fafafa;
+}

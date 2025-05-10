@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: nstern2002/react-good-eatz
+  repository: cs490group6/react-good-eatz
   pullPolicy: Always
   tag: "latest"
 

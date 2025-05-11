@@ -4,6 +4,8 @@ image:
   pullPolicy: Always
   tag: "latest"
 
+gitCommit: ""
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

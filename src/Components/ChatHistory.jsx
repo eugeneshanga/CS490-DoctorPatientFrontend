@@ -2,10 +2,27 @@ import { useState, useEffect } from 'react';
 
 export default function ChatHistory({ doctorId, patientId, isDoctor }) {
     const fixed = Boolean(doctorId && patientId);
+    const [contacts, setContacts]   = useState([]);
     const [targetId, setTargetId]           = useState('');
     const [appointments, setAppointments]   = useState([]);
     const [selectedAppt, setSelectedAppt]   = useState('');
     const [messages, setMessages]           = useState([]);
+
+    // 1) Fetch contacts once on mount (or when fixed IDs change)
+    useEffect(()=>{
+        if (fixed) return;
+        const params = isDoctor
+          ? `?doctor_id=${doctorId}`
+          : `?patient_id=${patientId}`;
+
+        fetch(`${window.API_BASE}/api/chat/contacts${params}`)
+          .then(r => r.json())
+          .then(list => {
+              setContacts(list);
+              if (list.length) setTargetId(list[0].id);
+          })
+          .catch(err => console.error('❌ Error loading contacts:', err));
+    }, [doctorId, patientId, isDoctor, fixed]);
 
     const resolvedDoctorId  = fixed
         ? doctorId
@@ -56,17 +73,22 @@ export default function ChatHistory({ doctorId, patientId, isDoctor }) {
         <div style={{ padding: '1rem', border: '1px solid #ccc' }}>
             <h3>Chat History</h3>
 
-            {/* Pick the “other” ID if not fixed */}
-            {!fixed && (
-                <div style={{ marginBottom: 10 }}>
-                    <label>{isDoctor ? 'Patient ID:' : 'Doctor ID:'}</label>
-                    <input
-                        value={targetId}
-                        onChange={e => setTargetId(e.target.value)}
-                        placeholder={isDoctor ? 'Enter patient ID' : 'Enter doctor ID'}
-                        style={{ marginLeft: 10 }}
-                    />
-                </div>
+            {/* ❶ Contacts dropdown (instead of free-text ID) */}
+            {!fixed && contacts.length > 0 && (
+              <div style={{ marginBottom: 10 }}>
+                  <label>{isDoctor ? 'Patient:' : 'Doctor:'}</label>
+                  <select
+                    value={targetId}
+                    onChange={e => setTargetId(e.target.value)}
+                    style={{ marginLeft: 10 }}
+                  >
+                      {contacts.map(c => (
+                        <option key={c.id} value={c.id}>
+                            {c.name} (#{c.id})
+                        </option>
+                      ))}
+                  </select>
+              </div>
             )}
 
             {/* Appointment selector */}

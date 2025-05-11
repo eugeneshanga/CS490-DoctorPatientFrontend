@@ -31,20 +31,14 @@ export default function App() {
   //
   const [activeReplyInputPostId, setActiveReplyInputPostId] = useState(null);
   const [activeRepliesPostId, setActiveRepliesPostId] = useState(null);
-  //const [activeReplyToReplyId, setActiveReplyToReplyId] = useState(null);
   //
   const [activeReplyToReplyInputs, setActiveReplyToReplyInputs] = useState({});
-  //const [activeReplyKey, setActiveReplyKey] = useState(null);
-
   const [replyToReplyTexts, setReplyToReplyTexts] = useState({});
-  // Below two are unused
-  //const [activeReplyToReplyIds, setActiveReplyToReplyIds] = useState(new Set());
-  //const [replyToReplyInputs, setReplyToReplyInputs] = useState({});
   //
-  const [upvoteStatuses, setUpvoteStatuses] = useState({});  // post_id => { count: 4, upvoted: true }
+  const [upvoteStatuses, setUpvoteStatuses] = useState({});
   //
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  // New ones for creating a meal plan
+  //
   const [newMealPlan, setNewMealPlan] = useState({
     title: '',
     description: '',
@@ -62,7 +56,6 @@ export default function App() {
   const user_id = user ? user.user_id : null;
   //
   const [isDoctor, setIsDoctor] = useState(false);
-  //const [isPatient, setIsPatient] = useState(false);
   const navigate = useNavigate();
 
   //
@@ -79,7 +72,7 @@ export default function App() {
   const fetchPosts = async () => {
     //console.log("Test user: ", user_type, " user_id: ", user_id)
     try {
-        const response = await fetch('http://localhost:5000/api/discussion/posts', {
+        const response = await fetch('${window.API_BASE}/api/discussion/posts', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -109,7 +102,7 @@ export default function App() {
 // Function to fetch upvote status for a post
 const fetchUpvoteStatus = async (post_id) => {
   try {
-    const res = await fetch(`http://localhost:5000/api/discussion/api/posts/upvotes/${post_id}?user_id=${user_id}`);
+    const res = await fetch(`${window.API_BASE}/api/discussion/api/posts/upvotes/${post_id}?user_id=${user_id}`);
     const data = await res.json();
     setUpvoteStatuses(prev => ({ ...prev, [post_id]: data }));
   } catch (error) {
@@ -117,15 +110,13 @@ const fetchUpvoteStatus = async (post_id) => {
   }
 };
 
-// Fetch upvote status for all posts when the component mounts
 useEffect(() => {
   posts.forEach(post => fetchUpvoteStatus(post.post_id));
-}, [posts]);  // Trigger this whenever the posts change
+}, [posts]);  
 
-// Function to toggle upvote status
 const toggleUpvote = async (post_id) => {
   try {
-    const res = await fetch('http://localhost:5000/api/discussion/api/posts/upvote', {
+    const res = await fetch('${window.API_BASE}/api/discussion/api/posts/upvote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ post_id, user_id }),
@@ -139,7 +130,7 @@ const toggleUpvote = async (post_id) => {
 
   const fetchMealPlans = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/doctor-dashboard/official/all?user_id=${user_id}`);
+      const response = await fetch(`${window.API_BASE}/doctor-dashboard/official/all?user_id=${user_id}`);
       if (response.ok) {
         const data = await response.json();
         setMealPlans(data.mealplans);
@@ -166,7 +157,7 @@ const toggleUpvote = async (post_id) => {
         formData.append('image', newMealPlan.image);
       }
   
-      const response = await fetch('http://localhost:5000/doctor-dashboard/official/create', {
+      const response = await fetch('${window.API_BASE}/doctor-dashboard/official/create', {
         method: 'POST',
         body: formData,
       });
@@ -187,7 +178,6 @@ const toggleUpvote = async (post_id) => {
     if (!selectedMealPlan) return;
   
     try {
-      // Create a full object instead of just { contents: description }
       const myContent = {
         description: selectedMealPlan.description,
         instructions: selectedMealPlan.instructions,
@@ -195,16 +185,16 @@ const toggleUpvote = async (post_id) => {
         calories: selectedMealPlan.calories,
         fat: selectedMealPlan.fat,
         sugar: selectedMealPlan.sugar,
-        image: selectedMealPlan.image, // if image exists
+        image: selectedMealPlan.image, 
       };
   
       const requestData = {
         doctor_id: user_id - 1,
         post_title: selectedMealPlan.title,
-        post_content: myContent, // now sending full meal plan info
+        post_content: myContent,
       };
   
-      const response = await fetch('http://localhost:5000/api/discussion/post', {
+      const response = await fetch('${window.API_BASE}/api/discussion/post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,12 +231,12 @@ const toggleUpvote = async (post_id) => {
     if (!replyContent || replyContent.trim() === "") return;
   
     try {
-      const response = await fetch('http://localhost:5000/api/discussion/reply', {
+      const response = await fetch('${window.API_BASE}/api/discussion/reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           post_id: postId,
-          user_id: user_id, // make sure `user_id` is the current patient
+          user_id: user_id, 
           reply_content: replyContent,
         }),
       });
@@ -262,6 +252,7 @@ const toggleUpvote = async (post_id) => {
           const isOpening = prev !== postId;
           if (isOpening) {
             fetchReplies(postId);
+            setActiveRepliesPostId(postId);
           }
           return isOpening ? postId : null;
         });
@@ -276,12 +267,11 @@ const toggleUpvote = async (post_id) => {
 
   const fetchReplies = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/discussion/replies/${postId}`);
+      const response = await fetch(`${window.API_BASE}/api/discussion/replies/${postId}`);
       if (response.ok) {
         const data = await response.json();
         setReplies(prev => ({ ...prev, [postId]: data }));
   
-        // NEW: Fetch comments for each reply
         data.forEach(reply => {
           fetchReplyComments(reply.reply_id);
           //toggleReplyToReplyInput(reply.reply_id);
@@ -294,81 +284,51 @@ const toggleUpvote = async (post_id) => {
     }
   };
 
-  // Toggle input for a specific reply
   const toggleReplyToReplyInput = (replyId, commentId) => {
-    const key = getInputKey(replyId, commentId);
-  
-    setActiveReplyToReplyInputs(prev => {
-      const isCurrentlyOpen = !!prev[key];
-      // If it's already open, close all
-      if (isCurrentlyOpen) {
-        return {};
-      } else {
-        // Otherwise open only this one and close all others
-        return { [key]: true };
-      }
-    });
-  };
-    /*
-    (replyId)
-    setActiveReplyToReplyId(prev => {
-      const isOpening = prev !== replyId;
-      if (isOpening) {
-        fetchReplyComments(replyId); // Lazy load here
-      }
-      return isOpening ? replyId : null;
-    });
-    
-    setActiveReplyToReplyIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(commentId)) {
-        newSet.delete(commentId);
-      } else {
-        newSet.add(commentId);
-      }
-      return newSet;
-    });
-  };
-  */
-  // Handle text input change
-  const handleReplyToReplyChange = (replyId, commentId, value) => {
+  const key = getInputKey(replyId, commentId);
+  setActiveReplyToReplyInputs(prev => ({
+    ...prev,
+    [key]: !prev[key],
+  }));
+};
+
+  const handleReplyToReplyChange = (replyId, commentId, text) => {
     const key = getInputKey(replyId, commentId);
     setReplyToReplyTexts(prev => ({
       ...prev,
-      [key]: value
+      [key]: text,
     }));
   };
 
   // Submit a reply-to-reply
-  const submitReplyToReply = async (parentCommentId, rootReplyId) => {
-    const key = getInputKey(rootReplyId, parentCommentId);
+  const submitReplyToReply = async (parentCommentId, replyId) => {
+    const key = getInputKey(replyId, parentCommentId);
     const content = replyToReplyTexts[key];
     if (!content) return;
-  
+
     try {
-      console.log("This happened??!?!11")
-      const response = await fetch('http://localhost:5000/api/discussion/reply-comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("${window.API_BASE}/api/discussion/reply-comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          reply_id: replyId,
           user_id: user_id,
-          reply_id: rootReplyId,
-          content: content,
+          parent_comment_id: parentCommentId,
+          content,
         }),
       });
-  
-      console.log("Sending reply comment:", { reply_id: rootReplyId, user_id, content });
-  
-      if (response.ok) {
-        console.log('Nested comment submitted');
-        //setActiveReplyToReplyIds(null);
-        fetchReplyComments(rootReplyId);
-      } else {
-        const errorData = await response.json();
-        console.error('Failed to submit nested comment:', errorData);
+
+      if (res.ok) {
+        //setReplyToReplyTexts(prev => ({ ...prev, [key]: '' }));
+        //setActiveReplyToReplyInputs(prev => ({ ...prev, [key]: false }));
+        //fetchReplyComments(replyId);
+        setReplyToReplyTexts(prev => ({ ...prev, [key]: '' }));
+        setActiveReplyToReplyInputs(prev => ({ ...prev, [key]: false }));
+        await fetchReplyComments(replyId); 
+        setActiveReplyCommentView(prev => ({ ...prev, [replyId]: true }));
       }
     } catch (err) {
-      console.error('Error submitting nested reply:', err);
+      console.error("Failed to submit reply to reply:", err);
     }
   };
   
@@ -377,12 +337,12 @@ const toggleUpvote = async (post_id) => {
     const commentMap = {};
     const rootComments = [];
   
-    flatComments.forEach(comment => {
+    flatComments.forEach((comment) => {
       comment.children = [];
       commentMap[comment.comment_id] = comment;
     });
   
-    flatComments.forEach(comment => {
+    flatComments.forEach((comment) => {
       if (comment.parent_comment_id) {
         const parent = commentMap[comment.parent_comment_id];
         if (parent) parent.children.push(comment);
@@ -398,7 +358,8 @@ const toggleUpvote = async (post_id) => {
     return comments.map(comment => {
       const key = getInputKey(replyId, comment.comment_id);
       const isActive = activeReplyToReplyInputs[key];
-  
+      console.log("Rendering comment", comment.comment_id, "at depth", depth);
+
       return (
         <div key={comment.comment_id} className={`ml-${depth * 4} mt-2`}>
           <div className="bg-gray-100 p-2 rounded text-sm">
@@ -406,42 +367,6 @@ const toggleUpvote = async (post_id) => {
               {userDisplayNames[comment.user_id] || 'Loading...'}
             </div>
             <div>{comment.content}</div>
-  
-            {/* Reply Button */}
-            <div className="flex justify-end">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleReplyToReplyInput(replyId, comment.comment_id)}}
-                className="text-blue-600 text-xs hover:underline"
-              >
-                {isActive ? 'Cancel Reply' : 'Reply'}
-              </button>
-            </div>
-  
-            {/* Reply Box */}
-            {isActive && (
-              <div className="mt-2">
-                <textarea
-                  className="w-full border p-2 rounded text-xs"
-                  rows="2"
-                  placeholder="Write a reply..."
-                  value={replyToReplyTexts[key] || ''}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleReplyToReplyChange(replyId, comment.comment_id, e.target.value)}}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    submitReplyToReply(comment.comment_id, replyId)}}
-                  className="mt-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs"
-                >
-                  Submit
-                </button>
-              </div>
-            )}
           </div>
   
           {/* Recursive rendering */}
@@ -454,31 +379,20 @@ const toggleUpvote = async (post_id) => {
   //
   const fetchReplyComments = async (replyId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/discussion/reply-comments/${replyId}`);
-      const data = await response.json();
-  
-      if (response.ok) {
-        setReplyComments(prev => ({
-          ...prev,
-          [replyId]: buildNestedComments(data),
-        }));
-        setActiveReplyCommentView(prev => ({
-          ...prev,
-          [replyId]: true,
-        }));
-      } 
-      else {
-        console.error("Failed to fetch reply comments", data);
-      }
-    } catch (error) {
-      console.error("Error fetching reply comments", error);
+      const res = await fetch(`${window.API_BASE}/api/discussion/reply-comments/${replyId}`);
+      const data = await res.json();
+      console.log("Fetched reply comments for", replyId, data); 
+      const nested = buildNestedComments(data);
+      setReplyComments(prev => ({ ...prev, [replyId]: nested }));
+    } catch (err) {
+      console.error("Failed to fetch reply comments:", err);
     }
   };
   
   //
   const fetchDisplayName = async (userId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/discussion/replies/username/${userId}`);
+      const res = await fetch(`${window.API_BASE}/api/discussion/replies/username/${userId}`);
       const data = await res.json();
       const name = data.name;
       //console.log("Name?: ", name)
@@ -515,7 +429,7 @@ const toggleUpvote = async (post_id) => {
 
   const fetchAuthorName = async (postId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/discussion/posts/author/${postId}`);
+      const res = await fetch(`${window.API_BASE}/api/discussion/posts/author/${postId}`);
       const data = await res.json();
       setAuthorNames(prev => ({ ...prev, [postId]: data.name }));
     } catch (err) {
@@ -605,7 +519,7 @@ const toggleUpvote = async (post_id) => {
                 {/* Meal Plan Image */}
                 {parsedContent.image && (
                   <img
-                    src={`http://localhost:5000/static/${parsedContent.image}`}
+                    src={`${window.API_BASE}/static/${parsedContent.image}`}
                     className="w-full h-48 object-cover rounded mb-4"
                   />
                 )}
@@ -624,7 +538,12 @@ const toggleUpvote = async (post_id) => {
                       setActiveRepliesPostId(prev => {
                         const isOpening = prev !== post.post_id;
                         if (isOpening) {
-                          fetchReplies(post.post_id);
+                          fetchReplies(post.post_id).then(() => {
+                            const currentReplies = replies[post.post_id] || [];
+                            currentReplies.forEach(reply => {
+                              fetchReplyComments(reply.reply_id);
+                            });
+                          });
                         }
                         return isOpening ? post.post_id : null;
                       });
@@ -729,9 +648,25 @@ const toggleUpvote = async (post_id) => {
                                 </button>
                               </div>
                             )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveReplyCommentView((prev) => ({
+                                  ...prev,
+                                  [reply.reply_id]: !prev[reply.reply_id],
+                                }));
+                              }}
+                              className="flex justify-end text-purple-600 text-xs hover:underline ml-2"
+                            >
+                              {activeReplyCommentView[reply.reply_id] ? "Hide Comments" : "View Comments"}
+                            </button>
                             {activeReplyCommentView[reply.reply_id] && (
                               <div className="ml-4 mt-2 space-y-1">
-                                {replyComments[reply.reply_id] && renderComments(replyComments[reply.reply_id], reply.reply_id)}
+                                {(replyComments[reply.reply_id]?.length > 0) ? (
+                                  renderComments(replyComments[reply.reply_id], reply.reply_id)
+                                ) : (
+                                  <p className="text-xs text-gray-500">No comments yet.</p>
+                                )}
                               </div>
                             )}
                           </div>
@@ -742,7 +677,6 @@ const toggleUpvote = async (post_id) => {
                     )}
                   </div>
                 )}
-                
                 {/* END OF THE BIG DIV */}
               </div>
             );
@@ -881,7 +815,7 @@ const toggleUpvote = async (post_id) => {
             
             {parsedSelectedPost.image && (
               <img
-                src={`http://localhost:5000/static/${parsedSelectedPost.image}`}
+                src={`${window.API_BASE}/static/${parsedSelectedPost.image}`}
                 alt="Meal Plan"
                 className="w-full h-64 object-cover rounded mb-4"
               />

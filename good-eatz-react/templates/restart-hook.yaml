@@ -9,7 +9,6 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: argocd-application-controller
       restartPolicy: Never
       containers:
         - name: restart

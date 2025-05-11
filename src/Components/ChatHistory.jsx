@@ -31,7 +31,7 @@ export default function ChatHistory({ doctorId, patientId, isDoctor }) {
         ? patientId
         : isDoctor ? targetId : patientId;
 
-    // 1) Once we have both IDs, fetch the appointments list
+    // Once we have both IDs, fetch the appointments list
     useEffect(() => {
         if (!resolvedDoctorId || !resolvedPatientId) return;
 

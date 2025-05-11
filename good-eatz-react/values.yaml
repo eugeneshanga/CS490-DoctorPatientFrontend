@@ -23,11 +23,12 @@ podSecurityContext: {}
 
 securityContext: {}
 service:
-  type: ClusterIP
+  type: NodePort
   port: 80
+  nodePort: 30003
 
 ingress:
-  enabled: true
+  enabled: false
   className: traefik           # or nginx, depending on your controller
   annotations: {}              # any extra annotations you need
   hosts:

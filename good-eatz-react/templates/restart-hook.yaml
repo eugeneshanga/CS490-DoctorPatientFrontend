@@ -3,12 +3,14 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: restart-good-eatz-react
+  namespace: argocd
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   template:
     spec:
+      serviceAccountName: argocd-application-controller
       restartPolicy: Never
       containers:
         - name: restart

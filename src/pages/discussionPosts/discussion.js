@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCcw  } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function App() {
@@ -31,9 +31,14 @@ export default function App() {
   //
   const [activeReplyInputPostId, setActiveReplyInputPostId] = useState(null);
   const [activeRepliesPostId, setActiveRepliesPostId] = useState(null);
-  const [activeReplyToReplyId, setActiveReplyToReplyId] = useState(null);
-  const [replyToReplyInputs, setReplyToReplyInputs] = useState({});
-  // New ones for creating a meal plan
+  //
+  const [activeReplyToReplyInputs, setActiveReplyToReplyInputs] = useState({});
+  const [replyToReplyTexts, setReplyToReplyTexts] = useState({});
+  //
+  const [upvoteStatuses, setUpvoteStatuses] = useState({});
+  //
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  //
   const [newMealPlan, setNewMealPlan] = useState({
     title: '',
     description: '',
@@ -51,8 +56,10 @@ export default function App() {
   const user_id = user ? user.user_id : null;
   //
   const [isDoctor, setIsDoctor] = useState(false);
-  //const [isPatient, setIsPatient] = useState(false);
   const navigate = useNavigate();
+
+  //
+  const getInputKey = (replyId, commentId) => `${replyId}:${commentId}`;
 
   useEffect(() => {
     fetchPosts();
@@ -63,9 +70,9 @@ export default function App() {
   }, []);
 
   const fetchPosts = async () => {
-    console.log("Test user: ", user_type, " user_id: ", user_id)
+    //console.log("Test user: ", user_type, " user_id: ", user_id)
     try {
-        const response = await fetch(`${window.API_BASE}/api/discussion/posts`, {
+        const response = await fetch('${window.API_BASE}/api/discussion/posts', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -73,7 +80,7 @@ export default function App() {
         });
         if (response.ok) {
           const data = await response.json();
-          console.log("Data:", data)
+          //console.log("Data:", data)
           // , ", title: ", data[0].post_title, ", content: ", data[0].post_content
           setPosts(data)
         } 
@@ -90,6 +97,36 @@ export default function App() {
         //setTimeout(() => setError(""), 10000); // Hide message after 10 seconds
       }
   };
+
+
+// Function to fetch upvote status for a post
+const fetchUpvoteStatus = async (post_id) => {
+  try {
+    const res = await fetch(`${window.API_BASE}/api/discussion/api/posts/upvotes/${post_id}?user_id=${user_id}`);
+    const data = await res.json();
+    setUpvoteStatuses(prev => ({ ...prev, [post_id]: data }));
+  } catch (error) {
+    console.error('Error fetching upvote status:', error);
+  }
+};
+
+useEffect(() => {
+  posts.forEach(post => fetchUpvoteStatus(post.post_id));
+}, [posts]);  
+
+const toggleUpvote = async (post_id) => {
+  try {
+    const res = await fetch('${window.API_BASE}/api/discussion/api/posts/upvote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id, user_id }),
+    });
+    //const result = await res.json();
+    fetchUpvoteStatus(post_id);  
+  } catch (error) {
+    console.error('Error toggling upvote:', error);
+  }
+};
 
   const fetchMealPlans = async () => {
     try {
@@ -120,7 +157,7 @@ export default function App() {
         formData.append('image', newMealPlan.image);
       }
   
-      const response = await fetch(`${window.API_BASE}/doctor-dashboard/official/create`, {
+      const response = await fetch('${window.API_BASE}/doctor-dashboard/official/create', {
         method: 'POST',
         body: formData,
       });
@@ -141,7 +178,6 @@ export default function App() {
     if (!selectedMealPlan) return;
   
     try {
-      // Create a full object instead of just { contents: description }
       const myContent = {
         description: selectedMealPlan.description,
         instructions: selectedMealPlan.instructions,
@@ -149,16 +185,16 @@ export default function App() {
         calories: selectedMealPlan.calories,
         fat: selectedMealPlan.fat,
         sugar: selectedMealPlan.sugar,
-        image: selectedMealPlan.image, // if image exists
+        image: selectedMealPlan.image, 
       };
   
       const requestData = {
         doctor_id: user_id - 1,
         post_title: selectedMealPlan.title,
-        post_content: myContent, // now sending full meal plan info
+        post_content: myContent,
       };
   
-      const response = await fetch(`${window.API_BASE}/api/discussion/post`, {
+      const response = await fetch('${window.API_BASE}/api/discussion/post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,12 +231,12 @@ export default function App() {
     if (!replyContent || replyContent.trim() === "") return;
   
     try {
-      const response = await fetch(`${window.API_BASE}/api/discussion/reply`, {
+      const response = await fetch('${window.API_BASE}/api/discussion/reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           post_id: postId,
-          user_id: user_id, // make sure `user_id` is the current patient
+          user_id: user_id, 
           reply_content: replyContent,
         }),
       });
@@ -216,6 +252,7 @@ export default function App() {
           const isOpening = prev !== postId;
           if (isOpening) {
             fetchReplies(postId);
+            setActiveRepliesPostId(postId);
           }
           return isOpening ? postId : null;
         });
@@ -235,7 +272,6 @@ export default function App() {
         const data = await response.json();
         setReplies(prev => ({ ...prev, [postId]: data }));
   
-        // NEW: Fetch comments for each reply
         data.forEach(reply => {
           fetchReplyComments(reply.reply_id);
           //toggleReplyToReplyInput(reply.reply_id);
@@ -248,83 +284,112 @@ export default function App() {
     }
   };
 
-  // Toggle input for a specific reply
-  const toggleReplyToReplyInput = (replyId) => {
-    setActiveReplyToReplyId(prev => {
-      const isOpening = prev !== replyId;
-      if (isOpening) {
-        fetchReplyComments(replyId); // Lazy load here
-      }
-      return isOpening ? replyId : null;
-    });
-  };
+  const toggleReplyToReplyInput = (replyId, commentId) => {
+  const key = getInputKey(replyId, commentId);
+  setActiveReplyToReplyInputs(prev => ({
+    ...prev,
+    [key]: !prev[key],
+  }));
+};
 
-  // Handle text input change
-  const handleReplyToReplyChange = (replyId, value) => {
-    setReplyToReplyInputs(prev => ({
+  const handleReplyToReplyChange = (replyId, commentId, text) => {
+    const key = getInputKey(replyId, commentId);
+    setReplyToReplyTexts(prev => ({
       ...prev,
-      [replyId]: value,
+      [key]: text,
     }));
   };
 
   // Submit a reply-to-reply
-  const submitReplyToReply = async (replyId) => {
-    const content = replyToReplyInputs[replyId];
+  const submitReplyToReply = async (parentCommentId, replyId) => {
+    const key = getInputKey(replyId, parentCommentId);
+    const content = replyToReplyTexts[key];
     if (!content) return;
 
     try {
-      const response = await fetch(`${window.API_BASE}/api/discussion/reply-comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const res = await fetch("${window.API_BASE}/api/discussion/reply-comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reply_id: replyId,
-          user_id: user_id,  
-          content: content,
+          user_id: user_id,
+          parent_comment_id: parentCommentId,
+          content,
         }),
       });
 
-      if (response.ok) {
-        console.log('Reply to reply submitted!');
-        setActiveReplyCommentView(prev => ({
-          ...prev,
-          [replyId]: true,
-        }));
-        setActiveReplyToReplyId(null);
-        fetchReplyComments(replyId); // <- fetch updated comments here
+      if (res.ok) {
+        //setReplyToReplyTexts(prev => ({ ...prev, [key]: '' }));
+        //setActiveReplyToReplyInputs(prev => ({ ...prev, [key]: false }));
+        //fetchReplyComments(replyId);
+        setReplyToReplyTexts(prev => ({ ...prev, [key]: '' }));
+        setActiveReplyToReplyInputs(prev => ({ ...prev, [key]: false }));
+        await fetchReplyComments(replyId); 
+        setActiveReplyCommentView(prev => ({ ...prev, [replyId]: true }));
       }
-      else {
-        console.error('Failed to submit reply to reply');
-      }
-    } catch (error) {
-      console.error('Error submitting reply to reply:', error.message);
+    } catch (err) {
+      console.error("Failed to submit reply to reply:", err);
     }
   };
+  
+  // test
+  const buildNestedComments = (flatComments) => {
+    const commentMap = {};
+    const rootComments = [];
+  
+    flatComments.forEach((comment) => {
+      comment.children = [];
+      commentMap[comment.comment_id] = comment;
+    });
+  
+    flatComments.forEach((comment) => {
+      if (comment.parent_comment_id) {
+        const parent = commentMap[comment.parent_comment_id];
+        if (parent) parent.children.push(comment);
+      } else {
+        rootComments.push(comment);
+      }
+    });
+  
+    return rootComments;
+  };  
+  //
+  const renderComments = (comments, replyId, depth = 0) => {
+    return comments.map(comment => {
+      const key = getInputKey(replyId, comment.comment_id);
+      const isActive = activeReplyToReplyInputs[key];
+      console.log("Rendering comment", comment.comment_id, "at depth", depth);
 
+      return (
+        <div key={comment.comment_id} className={`ml-${depth * 4} mt-2`}>
+          <div className="bg-gray-100 p-2 rounded text-sm">
+            <div className="font-semibold text-gray-700 text-xs">
+              {userDisplayNames[comment.user_id] || 'Loading...'}
+            </div>
+            <div>{comment.content}</div>
+          </div>
+  
+          {/* Recursive rendering */}
+          {comment.children?.length > 0 && renderComments(comment.children, replyId, depth + 1)}
+        </div>
+      );
+    });
+  };
+  
+  //
   const fetchReplyComments = async (replyId) => {
     try {
-      const response = await fetch(`${window.API_BASE}/api/discussion/reply-comments/${replyId}`);
-      const data = await response.json();
-  
-      if (response.ok) {
-        setReplyComments(prev => ({
-          ...prev,
-          [replyId]: data
-        }));
-        setActiveReplyCommentView(prev => ({
-          ...prev,
-          [replyId]: true,
-        }));
-      } 
-      else {
-        console.error("Failed to fetch reply comments", data);
-      }
-    } catch (error) {
-      console.error("Error fetching reply comments", error);
+      const res = await fetch(`${window.API_BASE}/api/discussion/reply-comments/${replyId}`);
+      const data = await res.json();
+      console.log("Fetched reply comments for", replyId, data); 
+      const nested = buildNestedComments(data);
+      setReplyComments(prev => ({ ...prev, [replyId]: nested }));
+    } catch (err) {
+      console.error("Failed to fetch reply comments:", err);
     }
   };
   
+  //
   const fetchDisplayName = async (userId) => {
     try {
       const res = await fetch(`${window.API_BASE}/api/discussion/replies/username/${userId}`);
@@ -379,27 +444,51 @@ export default function App() {
   return (
     <div className="min-h-screen flex bg-white">
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-screen w-64 bg-white border-r shadow-md flex flex-col p-4 rounded-tr-[40px] rounded-br-[40px]">
-        <div className="flex-1 overflow-auto">
-          <label className="font-semibold mb-2 block">Search:</label>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title"
-            className="p-2 border border-gray-300 rounded w-full"
-          />
-        </div>
+      <>
+      {/* Toggle Button - fixed next to sidebar */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded hover:bg-blue-700 shadow"
+        style={{
+          transform: sidebarOpen ? "translateX(256px)" : "translateX(0)", // Matches w-64 (256px)
+          transition: "transform 0.3s ease-in-out",
+        }}
+      >
+        {sidebarOpen ? "←" : "→"}
+      </button>
 
-        <div className="pt-4">
-          <button
-            onClick={() => returnToLastPlace()}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </button>
-        </div>
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-screen bg-white border-r shadow-md flex flex-col transition-all duration-300 rounded-tr-[40px] rounded-br-[40px] ${
+          sidebarOpen ? "w-64 p-4" : "w-0 p-0 overflow-hidden"
+        }`}
+      >
+        {sidebarOpen && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <span className="font-semibold text-lg">Search:</span>
+            </div>
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by title"
+              className="p-2 border border-gray-300 rounded w-full"
+            />
+
+            <div className="flex-1" />
+
+            <button
+              onClick={() => returnToLastPlace()}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              Back to Dashboard
+            </button>
+          </>
+        )}
       </aside>
+      </>
 
       {/* Main content */}
       <main className="flex-1 p-10 bg-[#d8eafe]">
@@ -449,7 +538,12 @@ export default function App() {
                       setActiveRepliesPostId(prev => {
                         const isOpening = prev !== post.post_id;
                         if (isOpening) {
-                          fetchReplies(post.post_id);
+                          fetchReplies(post.post_id).then(() => {
+                            const currentReplies = replies[post.post_id] || [];
+                            currentReplies.forEach(reply => {
+                              fetchReplyComments(reply.reply_id);
+                            });
+                          });
                         }
                         return isOpening ? post.post_id : null;
                       });
@@ -468,6 +562,21 @@ export default function App() {
                   >
                     {activeReplyInputPostId === post.post_id ? "Cancel Reply" : "Reply"}
                   </button>
+                  {/* Upvote button */}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleUpvote(post.post_id); // toggle upvote for the post
+                      }}
+                      className={`px-2 py-1 text-xs rounded ${upvoteStatuses[post.post_id]?.upvoted ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'}`}
+                    >
+                      {upvoteStatuses[post.post_id]?.upvoted ? 'Upvoted' : 'Upvote'}
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      {upvoteStatuses[post.post_id]?.count || 0} votes
+                    </span>
+                  </div>
                 </div>
                 {/* WRITE REPLY */}
                 {activeReplyInputPostId === post.post_id && (
@@ -498,8 +607,8 @@ export default function App() {
                       <div className="mt-4 space-y-2">
                         <h3 className="font-semibold text-gray-700">Replies:</h3>
                         {replies[post.post_id].map(reply => (
-                          <div key={reply.reply_id} className="bg-gray-100 p-2 rounded text-sm space-y-2">
-                            <div className="text-xs font-semibold text-gray-600">
+                          <div key={reply.reply_id} className="bg-white border rounded shadow-sm p-3 text-sm">
+                            <div className="text-xs font-semibold text-gray-700 mb-1">
                               {userDisplayNames[reply.user_id] || "Loading..."}
                             </div>
                             <div>{reply.reply_content}</div>
@@ -508,49 +617,56 @@ export default function App() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleReplyToReplyInput(reply.reply_id);
+                                toggleReplyToReplyInput(reply.reply_id, null);
                               }}
                               className="text-blue-600 text-xs hover:underline ml-2"
                             >
-                              {activeReplyToReplyId === reply.reply_id ? "Cancel Reply" : "Reply to this"}
+                              {activeReplyToReplyInputs[getInputKey(reply.reply_id, null)] ? "Cancel Reply" : "Reply"}
                             </button>
                             </div>
-                            {activeReplyCommentView[reply.reply_id] && (
-                              <div className="ml-4 mt-2 space-y-1">
-                                {replyComments[reply.reply_id] && replyComments[reply.reply_id].length > 0 ? (
-                                  replyComments[reply.reply_id].map(comment => (
-                                    <div key={comment.id} className="bg-gray-50 p-2 rounded text-xs">
-                                      <div className="font-semibold text-gray-700">
-                                        {userDisplayNames[comment.user_id] || 'Loading...'}
-                                      </div>
-                                      <div>{comment.content}</div>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="text-xs text-gray-500">No replies yet.</div>
-                                )}
-                              </div>
-                            )}
                             {/* If replying to this reply */}
-                            {activeReplyToReplyId === reply.reply_id && (
+                            {activeReplyToReplyInputs[getInputKey(reply.reply_id, null)] && (
                               <div className="mt-2">
                                 <textarea
-                                  className="w-full border p-2 rounded"
+                                  className="w-full border border-gray-300 p-2 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
                                   rows="2"
                                   placeholder="Write your reply to this reply..."
-                                  value={replyToReplyInputs[reply.reply_id] || ''}
-                                  onChange={(e) => handleReplyToReplyChange(reply.reply_id, e.target.value)}
+                                  value={replyToReplyTexts[getInputKey(reply.reply_id, null)] || ''}
+                                  onChange={(e) =>
+                                    handleReplyToReplyChange(reply.reply_id, null, e.target.value)
+                                  }
                                   onClick={(e) => e.stopPropagation()}
                                 />
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    submitReplyToReply(reply.reply_id);
+                                    submitReplyToReply(null, reply.reply_id); // replying directly to a reply
                                   }}
                                   className="mt-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs"
                                 >
                                   Submit
                                 </button>
+                              </div>
+                            )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveReplyCommentView((prev) => ({
+                                  ...prev,
+                                  [reply.reply_id]: !prev[reply.reply_id],
+                                }));
+                              }}
+                              className="flex justify-end text-purple-600 text-xs hover:underline ml-2"
+                            >
+                              {activeReplyCommentView[reply.reply_id] ? "Hide Comments" : "View Comments"}
+                            </button>
+                            {activeReplyCommentView[reply.reply_id] && (
+                              <div className="ml-4 mt-2 space-y-1">
+                                {(replyComments[reply.reply_id]?.length > 0) ? (
+                                  renderComments(replyComments[reply.reply_id], reply.reply_id)
+                                ) : (
+                                  <p className="text-xs text-gray-500">No comments yet.</p>
+                                )}
                               </div>
                             )}
                           </div>
@@ -561,20 +677,31 @@ export default function App() {
                     )}
                   </div>
                 )}
-                
                 {/* END OF THE BIG DIV */}
               </div>
             );
           })}
         </div>
       </main>
-      
+
+      {/* Refresh button (always shown) */}
+      <button
+        onClick={fetchPosts}
+        className="fixed bottom-10 right-28 flex flex-col items-center text-center"
+      >
+        <div className="w-16 h-16 flex items-center justify-center rounded-full border border-black text-white text-3xl bg-green-500 hover:bg-green-600 font-semibold shadow-lg transition transform hover:scale-105">
+          <RefreshCcw size={28} />
+        </div>
+        <span className="mt-2">Refresh</span>
+      </button>
+
+      {/* Add Post button (doctor only) */}
       {isDoctor && (
         <button
           onClick={() => setShowForm(true)}
           className="fixed bottom-10 right-10 flex flex-col items-center text-center"
         >
-          <div className="w-16 h-16 flex items-center justify-center rounded-full border border-black text-black text-3xl bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg transition transform hover:scale-105">
+          <div className="w-16 h-16 flex items-center justify-center rounded-full border border-black text-white text-3xl bg-blue-600 hover:bg-blue-700 font-semibold shadow-lg transition transform hover:scale-105">
             <Plus size={32} />
           </div>
           <span className="mt-2">Add post</span>

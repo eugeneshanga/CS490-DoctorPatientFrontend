@@ -38,6 +38,7 @@ export default function App() {
   const [upvoteStatuses, setUpvoteStatuses] = useState({});
   //
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sortMode, setSortMode] = useState('time'); // 'time' or 'upvotes'
   //
   const [newMealPlan, setNewMealPlan] = useState({
     title: '',
@@ -72,7 +73,11 @@ export default function App() {
   const fetchPosts = async () => {
     //console.log("Test user: ", user_type, " user_id: ", user_id)
     try {
-        const response = await fetch('${window.API_BASE}/api/discussion/posts', {
+          const endpoint = sortMode === 'upvotes' 
+          ? `${window.API_BASE}/api/discussion/posts/Up` 
+          : `${window.API_BASE}/api/discussion/posts`;
+
+        const response = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -116,7 +121,7 @@ useEffect(() => {
 
 const toggleUpvote = async (post_id) => {
   try {
-    const res = await fetch('${window.API_BASE}/api/discussion/api/posts/upvote', {
+    const res = await fetch(`${window.API_BASE}/api/discussion/api/posts/upvote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ post_id, user_id }),
@@ -157,7 +162,7 @@ const toggleUpvote = async (post_id) => {
         formData.append('image', newMealPlan.image);
       }
   
-      const response = await fetch('${window.API_BASE}/doctor-dashboard/official/create', {
+      const response = await fetch(`${window.API_BASE}/doctor-dashboard/official/create`, {
         method: 'POST',
         body: formData,
       });
@@ -194,7 +199,7 @@ const toggleUpvote = async (post_id) => {
         post_content: myContent,
       };
   
-      const response = await fetch('${window.API_BASE}/api/discussion/post', {
+      const response = await fetch(`${window.API_BASE}/api/discussion/post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -231,7 +236,7 @@ const toggleUpvote = async (post_id) => {
     if (!replyContent || replyContent.trim() === "") return;
   
     try {
-      const response = await fetch('${window.API_BASE}/api/discussion/reply', {
+      const response = await fetch(`${window.API_BASE}/api/discussion/reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -307,7 +312,7 @@ const toggleUpvote = async (post_id) => {
     if (!content) return;
 
     try {
-      const res = await fetch("${window.API_BASE}/api/discussion/reply-comments", {
+      const res = await fetch(`${window.API_BASE}/api/discussion/reply-comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -356,8 +361,8 @@ const toggleUpvote = async (post_id) => {
   //
   const renderComments = (comments, replyId, depth = 0) => {
     return comments.map(comment => {
-      const key = getInputKey(replyId, comment.comment_id);
-      const isActive = activeReplyToReplyInputs[key];
+      //const key = getInputKey(replyId, comment.comment_id);
+      //const isActive = activeReplyToReplyInputs[key];
       console.log("Rendering comment", comment.comment_id, "at depth", depth);
 
       return (
@@ -437,6 +442,10 @@ const toggleUpvote = async (post_id) => {
     }
   };
   
+  useEffect(() => {
+    fetchPosts(sortMode);
+  }, [sortMode]);
+
   const returnToLastPlace = () => {
     navigate(-1); 
   };
@@ -454,7 +463,7 @@ const toggleUpvote = async (post_id) => {
           transition: "transform 0.3s ease-in-out",
         }}
       >
-        {sidebarOpen ? "←" : "→"}
+        {sidebarOpen ? "← Close Settings" : "Open Settings →"}
       </button>
 
       {/* Sidebar */}
@@ -476,6 +485,18 @@ const toggleUpvote = async (post_id) => {
               placeholder="Search by title"
               className="p-2 border border-gray-300 rounded w-full"
             />
+
+            <div className="my-4" />
+
+            {/* Toggle sorting button */}
+            <button
+              onClick={() => {
+                setSortMode(prev => prev === 'time' ? 'upvotes' : 'time');
+              }}
+              className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 mb-4"
+            >
+              Sort by {sortMode === 'time' ? 'Upvotes' : 'Time'}
+            </button>
 
             <div className="flex-1" />
 

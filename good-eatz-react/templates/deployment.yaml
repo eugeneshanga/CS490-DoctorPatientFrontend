@@ -13,10 +13,11 @@ spec:
       {{- include "good-eatz-react.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        git-commit: "{{ .Values.gitCommit }}"
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "good-eatz-react.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}

@@ -1,0 +1,20 @@
+# templates/restart-hook.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restart-good-eatz-react
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      serviceAccountName: argocd-application-controller
+      restartPolicy: Never
+      containers:
+        - name: restart
+          image: bitnami/kubectl:1.27
+          command:
+            - /bin/sh
+            - -c
+            - kubectl rollout restart deployment good-eatz-react -n good-eatz-react

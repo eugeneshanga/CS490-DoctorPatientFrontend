@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       annotations:
-        git-commit: "{{ .Values.gitCommit }}"
+        git-commit: {{ .Values.gitCommit }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

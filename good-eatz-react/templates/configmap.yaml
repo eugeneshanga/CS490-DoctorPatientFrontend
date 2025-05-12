@@ -7,6 +7,14 @@ metadata:
 data:
   config.json: |
     {
-      "API_BASE": "",
-      "PHARMA_BASE": ""
+      "API_BASE": {{- if and .Values.api.host .Values.api.port -}}
+      "http://{{ .Values.api.host }}:{{ .Values.api.port }}"
+      {{- else -}}
+      ""
+      {{- end }},
+      "PHARMA_BASE": {{- if and .Values.pharma.host .Values.pharma.port -}}
+      "http://{{ .Values.pharma.host }}:{{ .Values.pharma.port }}"
+      {{- else -}}
+      ""
+      {{- end }}
     }

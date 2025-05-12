@@ -62,20 +62,14 @@ const router = createBrowserRouter([
 ]);
 
 async function loadConfigThenRender() {
-  let apiBase = 'http://localhost:5000';
-  let pharmaBase = 'http://localhost:5001';
+  let apiBase = '';
+  let pharmaBase = '';
   try {
     const resp = await fetch('/config.json', { cache: 'no-cache' });
     if (resp.ok) {
       const cfg = await resp.json();
-      if (cfg.API_BASE) {
-        apiBase = cfg.API_BASE;
-      }
-      if (cfg.PHARMA_BASE) {
-        pharmaBase = cfg.PHARMA_BASE;
-      }
-    } else {
-      console.warn('config.json not found, using fallback');
+      if (cfg.API_BASE)    apiBase    = cfg.API_BASE;
+      if (cfg.PHARMA_BASE) pharmaBase = cfg.PHARMA_BASE;
     }
   } catch (e) {
     console.warn('Failed to load config.json:', e);

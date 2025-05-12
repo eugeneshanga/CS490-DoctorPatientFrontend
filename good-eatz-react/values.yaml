@@ -72,9 +72,9 @@ tolerations: []
 affinity: {}
 
 api:
-  host: "10.0.0.157"
-  port: "30001"
+  host: ""
+  port: ""
 
 pharma:
-  host: "10.0.0.157"
-  port: "30002"
+  host: ""
+  port: ""

@@ -17,7 +17,7 @@ print("elements:", elements)
 testnum = 0
 
 time.sleep(2)
-# This will change when I give out id in my code
+
 for e in elements:
     if(testnum == 0):
         print("Setting Email")

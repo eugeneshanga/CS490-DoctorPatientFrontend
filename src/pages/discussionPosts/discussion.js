@@ -37,7 +37,7 @@ export default function App() {
   //
   const [upvoteStatuses, setUpvoteStatuses] = useState({});
   //
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sortMode, setSortMode] = useState('time'); // 'time' or 'upvotes'
   //
   const [newMealPlan, setNewMealPlan] = useState({
@@ -127,6 +127,7 @@ const toggleUpvote = async (post_id) => {
       body: JSON.stringify({ post_id, user_id }),
     });
     //const result = await res.json();
+    console.log("Upvote Pressed!")
     fetchUpvoteStatus(post_id);  
   } catch (error) {
     console.error('Error toggling upvote:', error);
@@ -463,12 +464,12 @@ const toggleUpvote = async (post_id) => {
           transition: "transform 0.3s ease-in-out",
         }}
       >
-        {sidebarOpen ? "← Close Settings" : "Open Settings →"}
+        {sidebarOpen ? "← Close Sidebar" : "Open Sidebar →"}
       </button>
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-white border-r shadow-md flex flex-col transition-all duration-300 rounded-tr-[40px] rounded-br-[40px] ${
+        className={`fixed top-0 left-0 h-screen bg-white border-r shadow-md flex flex-col transition-all duration-300 rounded-tr-[40px] rounded-br-[40px] z-40 ${
           sidebarOpen ? "w-64 p-4" : "w-0 p-0 overflow-hidden"
         }`}
       >
@@ -837,7 +838,7 @@ const toggleUpvote = async (post_id) => {
             {parsedSelectedPost.image && (
               <img
                 src={`${window.API_BASE}/static/${parsedSelectedPost.image}`}
-                alt="Meal Plan"
+                alt="Meal Plan Picture was here"
                 className="w-full h-64 object-cover rounded mb-4"
               />
             )}

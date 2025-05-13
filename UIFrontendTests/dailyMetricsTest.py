@@ -106,7 +106,16 @@ try:
 except Exception as e:
     print("Error interacting with modal:", e)
 
-    time.sleep(2)
+
+time.sleep(1)
+
+try:
+    alert = driver.switch_to.alert
+    print("Alert text:", alert.text)
+    alert.accept()  # Accept the alert (click OK)
+except:
+    print("The Metris was a failure")
+    pass  # No alert present, continue
 
 time.sleep(2)
 driver.quit()

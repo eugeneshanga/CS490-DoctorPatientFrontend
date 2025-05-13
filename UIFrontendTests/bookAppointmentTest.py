@@ -22,13 +22,14 @@ for e in elements:
     if(testnum == 0):
         print("Setting Email")
         e.send_keys("jane.doe@example.com")
-        time.sleep(1)
+        #time.sleep(1)
     if(testnum == 1):
         print("Setting password")
         e.send_keys("password")
-        time.sleep(1)
+        #time.sleep(1)
     testnum+=1
 
+time.sleep(2)
 buttons = driver.find_elements(By.TAG_NAME, 'button')
 print("Buttons?: ", buttons)
 for b in buttons:
@@ -63,7 +64,7 @@ else:
 time.sleep(1)
 
 datetime_input = driver.find_element(By.XPATH, "//input[@type='datetime-local']")
-datetime_input.send_keys("2025-05-14T10:35") 
+datetime_input.send_keys("05-14-2025T16:00") 
 time.sleep(1)
 
 submit_button = driver.find_element(By.XPATH, "//button[normalize-space()='Submit']")

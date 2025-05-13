@@ -86,7 +86,7 @@ export default function App() {
         if (response.ok) {
           const data = await response.json();
           //console.log("Data:", data)
-          // , ", title: ", data[0].post_title, ", content: ", data[0].post_content
+          //  ", title: ", data[0].post_title, ", content: ", data[0].post_content
           setPosts(data)
         } 
         else {

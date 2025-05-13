@@ -37,7 +37,7 @@ export default function App() {
   //
   const [upvoteStatuses, setUpvoteStatuses] = useState({});
   //
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sortMode, setSortMode] = useState('time'); // 'time' or 'upvotes'
   //
   const [newMealPlan, setNewMealPlan] = useState({

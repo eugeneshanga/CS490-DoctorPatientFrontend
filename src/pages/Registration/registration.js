@@ -219,7 +219,7 @@ const Registration = () => {
       )}
       {roleChosen && (<div className={registrationStyles.central_sections}>
           {selectedRole === "Patient" && (
-            <div className={registrationStyles.user_divs}>
+            <form className={registrationStyles.user_divs} onSubmit={(e) => { e.preventDefault(); regPatient();}}>
               <h1 className={registrationStyles.userh1}>Patient Registration</h1>
               {/* Name */}
               <div className={registrationStyles.input_div_1}>
@@ -249,7 +249,7 @@ const Registration = () => {
                 <div className={registrationStyles.input_div_2}>
                   <input
                     id="text-in"
-                    type="text"
+                    type="email"
                     placeholder="EMAIL"
                     className={registrationStyles.input}
                     value={email}
@@ -310,7 +310,6 @@ const Registration = () => {
                 </div>
               </div>
               <button id="reg-btn" type="submit" className={registrationStyles.register_button}
-                      onClick={() => regPatient()}
                       disabled={!!zipError}
               >
                 REGISTER
@@ -333,10 +332,10 @@ const Registration = () => {
                   Return to Home Page
                 </Link>
               </p>
-            </div>
+            </form>
           )}
           {selectedRole === "Doctor" && (
-            <div className={registrationStyles.user_divs}>
+            <form className={registrationStyles.user_divs} onSubmit={(e) => { e.preventDefault(); regDoctor(); }}>
               <h1 className={registrationStyles.userh1}>Doctor Registration</h1>
               {/* Name */}
               <div className={registrationStyles.input_div_1}>
@@ -366,7 +365,7 @@ const Registration = () => {
                 <div className={registrationStyles.input_div_2}>
                   <input
                     id="text-in"
-                    type="text"
+                    type="email"
                     placeholder="EMAIL"
                     className={registrationStyles.input}
                     value={email}
@@ -452,8 +451,7 @@ const Registration = () => {
                 </div>
               </div>
               {/* Buttons */}
-              <button id="reg-btn" type="submit" className={registrationStyles.register_button}
-                      onClick={() => regDoctor()}>
+              <button id="reg-btn" type="submit" className={registrationStyles.register_button} disabled={!!zipError}>
                 REGISTER
               </button>
               <div className="mt-4 mb-4 w-full">
@@ -474,10 +472,10 @@ const Registration = () => {
                   Return to Home Page
                 </Link>
               </p>
-            </div>
+            </form>
           )}
           {selectedRole === "Pharmacist" && (
-            <div className={registrationStyles.user_divs}>
+            <form className={registrationStyles.user_divs}  onSubmit={(e) => { e.preventDefault(); regPharmacy(); }}>
               <h1 className={registrationStyles.userh1}>Pharmacy Registration</h1>
               {/* Name */}
               <div className={registrationStyles.input_div_1}>
@@ -577,7 +575,6 @@ const Registration = () => {
               </div>
               {/* Buttons */}
               <button id="reg-btn" type='submit' className={registrationStyles.register_button}
-                      onClick={() => regPharmacy()}
                       disabled={!!zipError}
               >
                 REGISTER
@@ -600,7 +597,7 @@ const Registration = () => {
                   Return to Home Page
                 </Link>
               </p>
-            </div>
+            </form>
           )}
         </div>
       )}

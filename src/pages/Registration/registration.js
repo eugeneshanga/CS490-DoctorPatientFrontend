@@ -79,7 +79,7 @@ const Registration = () => {
       if (response.ok) {
         alert('Registration Successful');
         const data = await response.json();
-        console.log("Data:", data)
+        //console.log("Data:", data)
         navigate(-1);
       } else {
         const data = await response.json();
@@ -117,7 +117,7 @@ const Registration = () => {
       if (response.ok) {
         alert('Registration Successful');
         const data = await response.json();
-        console.log("Data:", data)
+        //console.log("Data:", data)
         navigate(-1);
       } else {
         const data = await response.json();
@@ -156,7 +156,7 @@ const Registration = () => {
       if (response.ok) {
         alert('Registration Successful');
         const data = await response.json();
-        console.log("Data:", data)
+        //console.log("Data:", data)
         navigate(-1);
       } else {
         const data = await response.json();

@@ -170,6 +170,7 @@ const toggleUpvote = async (post_id) => {
   
       if (response.ok) {
         console.log('Meal plan created successfully!');
+        alert('Meal plan created successfully!');
         setShowCreateModal(false);
         fetchPosts();
       } else {

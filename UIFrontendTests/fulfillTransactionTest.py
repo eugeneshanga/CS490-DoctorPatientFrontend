@@ -117,6 +117,22 @@ except:
     print("The payment was a failure")
     pass
 
+time.sleep(2)
+
+buttons2 = driver.find_elements(By.TAG_NAME, 'button')
+# print("Buttons?: ", buttons)
+tempVal2 = 0
+for b2 in buttons2:
+    print("t: ", tempVal2)
+    if tempVal2 != 3:
+        b2.click()
+        #time.sleep(1)
+    else:
+        b2.click()
+        break
+    tempVal2+=1
+
+
 print("Done.")
 time.sleep(2)
 

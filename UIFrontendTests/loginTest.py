@@ -22,13 +22,14 @@ for e in elements:
     if(testnum == 0):
         print("Setting Email")
         e.send_keys("jane.doe@example.com")
-        time.sleep(2)
+        #time.sleep(2)
     if(testnum == 1):
         print("Setting password")
         e.send_keys("password")
-        time.sleep(2)
+        #time.sleep(2)
     testnum+=1
 
+time.sleep(2)
 buttons = driver.find_elements(By.TAG_NAME, 'button')
 print("Buttons?: ", buttons)
 for b in buttons:
@@ -79,13 +80,14 @@ for e in elements:
     if(testnum == 0):
         print("Setting Email")
         e.send_keys("dr.house@example.com")
-        time.sleep(2)
+        #time.sleep(2)
     if(testnum == 1):
         print("Setting password")
         e.send_keys("password")
-        time.sleep(2)
+        #time.sleep(2)
     testnum+=1
 
+time.sleep(2)
 buttons = driver.find_elements(By.TAG_NAME, 'button')
 print("Buttons?: ", buttons)
 for b in buttons:
@@ -135,13 +137,14 @@ for e in elements:
     if(testnum == 0):
         print("Setting Email")
         e.send_keys("goodhealthrx@example.com")
-        time.sleep(2)
+        #time.sleep(2)
     if(testnum == 1):
         print("Setting password")
         e.send_keys("password")
-        time.sleep(2)
+        #time.sleep(2)
     testnum+=1
 
+time.sleep(2)
 buttons = driver.find_elements(By.TAG_NAME, 'button')
 print("Buttons?: ", buttons)
 for b in buttons:

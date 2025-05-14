@@ -61,10 +61,11 @@ for t in the_fields:
     temp1+=1
 
 time.sleep(2)
+
 print("button")
 submitpat = driver.find_element(By.ID, 'reg-btn')
 submitpat.click()
-time.sleep(1)
+time.sleep(2)
 try:
     alert = driver.switch_to.alert
     print("Alert text:", alert.text)
@@ -72,10 +73,11 @@ try:
 except:
     print("The Reg was a failure")
     pass  # No alert present, continue
+
 time.sleep(2)
 
 print("=Registration Patient Done=")
-
+time.sleep(2)
 # DOCOTOR REG
 signup_button = driver.find_element(by=By.CLASS_NAME, value="hero-btn")
 print("===Getting the elements===")

@@ -38,7 +38,7 @@ const Login = () => {
       if (response.ok) {
         alert('Login Successful');
         const data = await response.json();
-        console.log("Data:", data)
+        //console.log("Data:", data)
         localStorage.setItem('user', JSON.stringify(data.user));
         if(data.user.user_type === 'patient'){
           navigate('/patient');
@@ -52,7 +52,7 @@ const Login = () => {
       } 
       else {
         const data = await response.json();
-        console.log("Data but went wrong:", data)
+        //console.log("Data but went wrong:", data)
         //alert("Data but went wrong:", data)
         setError(data.error)
         setTimeout(() => setError(""), 10000); // Hide message after 10 seconds
@@ -60,7 +60,7 @@ const Login = () => {
     } 
     catch (error) {
       //setMessage('Error: ' + error.message); 
-      console.log('Error: ' + error.message);
+      //console.log('Error: ' + error.message);
       //alert('Error: ' + error.message);
       setError('Error: ' + error.message);
       setTimeout(() => setError(""), 10000); // Hide message after 10 seconds

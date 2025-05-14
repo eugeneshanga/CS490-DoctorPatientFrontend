@@ -79,15 +79,17 @@ const Registration = () => {
       if (response.ok) {
         alert('Registration Successful');
         const data = await response.json();
-        console.log("Data:", data)
+        //console.log("Data:", data)
         navigate(-1);
       } else {
         const data = await response.json();
-        console.log("Data but went wrong:", data)
+        //console.log("Data but went wrong:", data)
+        alert('Registration Error');
       }
     } catch (error) {
       //setMessage('Error: ' + error.message);
-      console.log('Error: ' + error.message);
+      //console.log('Error: ' + error.message);
+      alert('Registration Error' + error.message);
     }
   };
   //
@@ -115,15 +117,17 @@ const Registration = () => {
       if (response.ok) {
         alert('Registration Successful');
         const data = await response.json();
-        console.log("Data:", data)
+        //console.log("Data:", data)
         navigate(-1);
       } else {
         const data = await response.json();
-        console.log("Data but went wrong:", data)
+        //console.log("Data but went wrong:", data)
+        alert('Registration Error');
       }
     } catch (error) {
       //setMessage('Error: ' + error.message);
-      console.log('Error: ' + error.message);
+      //console.log('Error: ' + error.message);
+      alert('Registration Error' + error.message);
     }
   };
   //
@@ -152,15 +156,17 @@ const Registration = () => {
       if (response.ok) {
         alert('Registration Successful');
         const data = await response.json();
-        console.log("Data:", data)
+        //console.log("Data:", data)
         navigate(-1);
       } else {
         const data = await response.json();
-        console.log("Data but went wrong:", data)
+        //console.log("Data but went wrong:", data)
+        alert('Registration Error');
       }
     } catch (error) {
       //setMessage('Error: ' + error.message);
-      console.log('Error: ' + error.message);
+      //console.log('Error: ' + error.message);
+      alert('Registration Error' + error.message);
     }
   };
   /* The React Code Section BELOW  */

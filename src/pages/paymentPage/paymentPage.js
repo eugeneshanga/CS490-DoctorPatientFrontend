@@ -23,7 +23,7 @@ const PaymentPage = () => {
 
   useEffect(() => {
     //const getRealTransaction = async () => {
-      console.log("TEST!!!!!!!!!!!")
+      //console.log("TEST!!!!!!!!!!!")
       
 
       if(txnType === "pharmacy"){
@@ -31,8 +31,8 @@ const PaymentPage = () => {
             .then(response => response.json())
             .then(data => {
               setPayment(data);
-              console.log(data);
-              console.log(payment)
+              //console.log(data);
+              //console.log(payment)
             })
             .catch(error => console.error('Error fetching patient details:', error));
       }
@@ -41,8 +41,8 @@ const PaymentPage = () => {
             .then(response => response.json())
             .then(data => {
               setPayment(data);
-              console.log(data);
-              console.log(payment)
+              //console.log(data);
+              //console.log(payment)
             })
             .catch(error => console.error('Error fetching patient details:', error));
       }
@@ -104,7 +104,7 @@ const PaymentPage = () => {
         if (!requestedData) 
           throw new Error('Invalid updatedData');
         
-        console.log("Am i real?:", requestedData)
+        //console.log("Am i real?:", requestedData)
         const response = await fetch(`${window.API_BASE}/api/payment/transaction/payments/pharmacy/${payment_id}/fulfill`, {
           method: 'PATCH', // Use PATCH to update
           headers: {
@@ -117,7 +117,7 @@ const PaymentPage = () => {
         }
         const data = await response.json();
         // Debugging response data
-        console.log('Response data:', data);
+        //console.log('Response data:', data);
         if (data.message) {
           console.log(data.message); // Success message
         } 
@@ -149,7 +149,7 @@ const PaymentPage = () => {
         }
         const data = await response.json();
         // Debugging response data
-        console.log('Response data:', data);
+        //console.log('Response data:', data);
         if (data.message) {
           console.log(data.message); // Success message
         } 
@@ -174,8 +174,8 @@ const PaymentPage = () => {
         cvv: cvv
       };
       fulfillPayment(txnId, updatedData)
-      console.log("Payment id?:", txnId)
-      console.log("Data?:" , updatedData)
+      //console.log("Payment id?:", txnId)
+      //console.log("Data?:" , updatedData)
       alert("Transction Complete")
       navigate('/payment', {
         state: {

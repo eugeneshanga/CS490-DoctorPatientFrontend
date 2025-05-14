@@ -56,7 +56,7 @@ function PharmacyDashboard() {
   };
 
   const updatePrice = async (drug_id, price) => {
-    await axios.patch(`${window.PHARMA_BASE}/api/pharmacy/update`, {
+    await axios.patch(`${window.PHARMA_BASE}/api/prices/update`, {
       user_id, drug_id, price
     });
     fetchPrices();

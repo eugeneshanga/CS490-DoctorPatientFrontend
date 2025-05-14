@@ -33,3 +33,27 @@ def login_as_pharmacy(driver):
         EC.element_to_be_clickable((By.XPATH, "//button[text()='Dashboard']"))
     )
     return driver
+@pytest.fixture(scope="module")
+def login_as_patient(driver):
+    # navigate to login
+    driver.get(f"{BASE_URL}/login")
+
+    # wait for the login form to appear
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "email-field"))
+    )
+
+    # fill in patient creds
+    driver.find_element(By.ID, "email-field").send_keys("pat1@example.com")
+    driver.find_element(By.ID, "password-field").send_keys("password")
+
+    # submit
+    driver.find_element(By.CSS_SELECTOR, "button[type=submit]").click()
+
+    # wait for the “Chat History” tab to become clickable
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[text()='Chat History']"))
+    )
+
+    # hand back the logged‐in driver
+    return driver

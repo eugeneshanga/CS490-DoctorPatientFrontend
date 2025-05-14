@@ -83,13 +83,13 @@ const Registration = () => {
         navigate(-1);
       } else {
         const data = await response.json();
-        //console.log("Data but went wrong:", data)
-        alert('Registration Error');
+        console.log("Data but went wrong:", data)
+        alert('Registration Failed');
       }
     } catch (error) {
       //setMessage('Error: ' + error.message);
-      //console.log('Error: ' + error.message);
-      alert('Registration Error' + error.message);
+      console.log('Error: ' + error.message);
+      alert('Registration Failed: ' + error.message);
     }
   };
   //
@@ -121,13 +121,13 @@ const Registration = () => {
         navigate(-1);
       } else {
         const data = await response.json();
-        //console.log("Data but went wrong:", data)
-        alert('Registration Error');
+        console.log("Data but went wrong:", data)
+        alert('Registration Failed');
       }
     } catch (error) {
       //setMessage('Error: ' + error.message);
-      //console.log('Error: ' + error.message);
-      alert('Registration Error' + error.message);
+      console.log('Error: ' + error.message);
+      alert('Registration Failed: ' + error.message);
     }
   };
   //
@@ -160,13 +160,13 @@ const Registration = () => {
         navigate(-1);
       } else {
         const data = await response.json();
-        //console.log("Data but went wrong:", data)
-        alert('Registration Error');
+        console.log("Data but went wrong:", data)
+        alert('Registration Failed');
       }
     } catch (error) {
       //setMessage('Error: ' + error.message);
-      //console.log('Error: ' + error.message);
-      alert('Registration Error' + error.message);
+      console.log('Error: ' + error.message);
+      alert('Registration Failed: ' + error.message);
     }
   };
   /* The React Code Section BELOW  */
@@ -260,6 +260,7 @@ const Registration = () => {
                     className={registrationStyles.input}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -272,6 +273,7 @@ const Registration = () => {
                     className={registrationStyles.input}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -376,6 +378,7 @@ const Registration = () => {
                     className={registrationStyles.input}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -386,6 +389,7 @@ const Registration = () => {
                     type="text"
                     placeholder="PASSWORD"
                     className={registrationStyles.input}
+                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
